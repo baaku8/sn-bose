@@ -1,0 +1,30 @@
+{
+  "name": "sn-bose-sync-up",
+  "version": "1.0.0",
+  "description": "Team Finder is a the solution to a problem faced by many developers i.e. finding team based on their expertise. It is a platform which helps developers connect to an existing team project as well as make their own team.",
+  "keywords": [
+    "sn-bose"
+  ],
+  "homepage": "https://github.com/baaku8/sn-bose#readme",
+  "bugs": {
+    "url": "https://github.com/baaku8/sn-bose/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baaku8/sn-bose.git"
+  },
+  "license": "ISC",
+  "author": "Piyush Chatterjee, Hrishikesh Sharma, Rohan Majumder, Bhargav Jyoti Nath",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.3",
+    "nodemon": "^3.1.14"
+  }
+}
