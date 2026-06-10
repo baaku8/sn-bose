@@ -1,10 +1,24 @@
 import "dotenv/config"
 import app from "./src/app.js";
 import DbConnect from "./src/common/config/db.js";
+import User from "./src/modules/UserProfile/user.model.js";
+import authRouter from "./src/modules/Authentication/authRouter.js";
+import profileRouter from "./src/modules/UserProfile/userProfile.Routes.js";
+import express from "express";
+import { connectRedis } from "./src/common/config/redis.js";
+import cookieParser from "cookie-parser";
 
-const PORT=process.env.PORT || 5000;
-const start=async()=>{
-    await DbConnect();    //connected database
+app.use(express.json());
+app.use(cookieParser());
+
+app.use('/user', authRouter);
+app.use('/profile' , profileRouter );
+
+const start = async()=>{
+    // await DbConnect();
+    await Promise.all([DbConnect(), connectRedis()]);   //connected database
+
+    const PORT=process.env.PORT || 5001;
     app.listen(PORT,()=>{
         console.log(`Server is running in port ${PORT} and is in ${process.env.NODE_ENV} mode`);
     })
