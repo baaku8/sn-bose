@@ -1,9 +1,9 @@
-
-
-import User from "./user.model.js";
+import User from "./user.models.js";
+import APIError from "../../common/utils/api-error.js";
+import APIResponse from "../../common/utils/api-response.js";
 
 // 1. UPDATE PROFILE
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res, next) => {
     try {
         // req.user is populated by your protectRoute middleware
         const userId = req.user._id;
@@ -21,10 +21,7 @@ export const updateProfile = async (req, res) => {
 
         // Ensure they actually sent data to update
         if (Object.keys(updates).length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "No valid fields provided for update"
-            });
+            throw APIError.badRequest("No valid fields provided for update");
         }
 
         // Find the user and apply updates, returning the updated document
@@ -34,40 +31,29 @@ export const updateProfile = async (req, res) => {
             { returnDocument: 'after' , runValidators: true }
         ).select('-password'); // Never send the password back
 
-        res.status(200).json({
-            success: true,
-            message: "Profile updated successfully",
+        return APIResponse.ok(res, "Profile updated successfully", {
             user: updatedUser
         });
 
     } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to update profile",
-            error: err.message
-        });
+        next(err);
     }
 };
 
 
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
     try {
         // Since protectRoute already fetched the user from the DB, we can just return it!
-        res.status(200).json({
-            success: true,
+        return APIResponse.ok(res, "Profile fetched successfully", {
             user: req.user
         });
     } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: "Server Error fetching profile",
-            error: err.message
-        });
+        next(err);
     }
 };
 
 // 3. DELETE PROFILE
-export const deleteProfile = async (req, res) => {
+export const deleteProfile = async (req, res, next) => {
     try {
         const userId = req.user._id;
 
@@ -81,15 +67,8 @@ export const deleteProfile = async (req, res) => {
             sameSite: isProduction ? 'none' : 'lax'
         });
 
-        res.status(200).json({
-            success: true,
-            message: "User account deleted successfully"
-        });
+        return APIResponse.ok(res, "User account deleted successfully");
     } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to delete account",
-            error: err.message
-        });
+        next(err);
     }
 };

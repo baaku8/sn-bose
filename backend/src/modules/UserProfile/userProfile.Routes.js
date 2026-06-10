@@ -1,8 +1,8 @@
 
 
 import express from "express" ;
-import { userMiddleware } from "./userMiddleware.js";
-import { updateProfile , getProfile , deleteProfile } from "./userProfileController.js";
+import { userMiddleware } from "./user.middlewares.js";
+import { updateProfile , getProfile , deleteProfile } from "./userProfile.controllers.js";
 
 const profileRouter = express.Router();
 

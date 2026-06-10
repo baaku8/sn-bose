@@ -1,31 +1,31 @@
-
-import User from '../UserProfile/user.model.js';
+import User from '../UserProfile/user.models.js';
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import { validate } from '../../common/utils/validator.js';
 import { redisClient } from '../../common/config/redis.js';
+import APIError from '../../common/utils/api-error.js';
+import APIResponse from '../../common/utils/api-response.js';
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
     try {
         
-        validate(req.body);
+        try {
+            validate(req.body);
+        } catch (err) {
+            throw APIError.badRequest(err.message);
+        }
+
         const { firstName, lastName, email, password } = req.body;
         
         // 2. Validate essential data
         if (!firstName || !lastName || !email || !password) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Please provide all required fields (name, email, password)." 
-            });
+            throw APIError.badRequest("Please provide all required fields (name, email, password).");
         }
 
         // 3. Prevent duplicate registrations
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "A user with this email already exists." 
-            });
+            throw APIError.conflict("A user with this email already exists.");
         }
 
         // 4. Hash the password
@@ -66,47 +66,36 @@ export const registerUser = async (req, res) => {
         });
 
         // 9. Send the success response
-        res.status(201).json({
-            success: true,
-            message: "User Registered Successfully",
-            // user: reply,
-            // token: token // Returning it in JSON as well is useful for certain frontend state managers
+        return APIResponse.create(res, "User Registered Successfully", {
+            user: reply
         });
 
     } catch (err) {
-        // Send a cleaner JSON error instead of a raw string
-        res.status(500).json({ 
-            success: false, 
-            message: "Server Error", 
-            error: err.message 
-        });
+        next(err);
     }
 };
 
-export const loginUser = async (req,res)=>{
+export const loginUser = async (req, res, next) => {
 
     try{
         const {email, password} = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Please provide both email and password" 
-            });
+            throw APIError.badRequest("Please provide both email and password");
         }
 
         const user = await User.findOne({ email }).select('+password');
         
         // 3. Verify user exists and password matches
         if (!user) {
-            return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            throw APIError.unauthorized("Invalid Credentials");
         }
 
         const match = await bcrypt.compare(password , user.password);
 
         if(!match)
         {
-            return res.status(401).json({ success: false, message: "Invalid Credentials" });
+            throw APIError.unauthorized("Invalid Credentials");
         }
             
 
@@ -118,7 +107,11 @@ export const loginUser = async (req,res)=>{
             isAvailable: user.isAvailable
         }
 
-        const token =  jwt.sign({_id:user._id , email: user.email },process.env.JWT_SECRET_KEY,{expiresIn: 60*60});
+        const token =  jwt.sign(
+            {_id:user._id , email: user.email },
+            process.env.JWT_SECRET_KEY,
+            {expiresIn: 60*60}
+        );
         
         const isProduction = process.env.NODE_ENV === 'production';
         res.cookie('token', token, {
@@ -127,32 +120,24 @@ export const loginUser = async (req,res)=>{
             secure: isProduction ,        // REQUIRED for live HTTPS sites
             sameSite: isProduction ? 'none' : 'lax'    // REQUIRED for cross-domain cookies
         });
-        res.status(200).json({
-            success:true ,
-            user:reply,
-            message:"Logged In Succesfully"
-        })
+
+        return APIResponse.ok(res, "Logged In Succesfully", {
+            user: reply
+        });
     }
     catch(err){
-        res.status(500).json({ 
-            success: false, 
-            message: "Server Error",
-            error: err.message
-        })
+        next(err);
     }
 };
 
-export const logoutUser = async (req, res) => {
+export const logoutUser = async (req, res, next) => {
     try {
         // 1. Get the token safely
         // req.cookies might be undefined if cookie-parser isn't working, so we use optional chaining (?.)
         const token = req.cookies?.token;
 
         if (!token) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "You are already logged out" 
-            });
+            throw APIError.badRequest("You are already logged out");
         }
 
         // 2. Decode the token to find its expiration timestamp
@@ -176,18 +161,9 @@ export const logoutUser = async (req, res) => {
         });
         
         // 5. Send a clean JSON response
-        res.status(200).json({
-            success: true,
-            message: "Logged Out Successfully"
-        });
+        return APIResponse.ok(res, "Logged Out Successfully");
 
     } catch (err) {
-        res.status(500).json({ 
-            success: false, 
-            message: "Server Error", 
-            error: err.message 
-        });
+        next(err);
     }
 };
-
-

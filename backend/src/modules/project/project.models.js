@@ -33,7 +33,7 @@ const projectSchema = new mongoose.Schema(
 
         leader: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Profile",
+            ref: "User",
             required: true,
         },
 

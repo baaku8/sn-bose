@@ -16,7 +16,7 @@ const teamSchema = new mongoose.Schema(
 
         leader: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Profile",
+            ref: "User",
             required: true,
         },
 
@@ -27,7 +27,7 @@ const teamSchema = new mongoose.Schema(
 
         members: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Profile",
+            ref: "User",
         }],
 
         maxMembers: {
