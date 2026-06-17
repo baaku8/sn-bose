@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom"; // Added Navigate
 import axios from "axios";
 
 import LoginModal from "../components/LoginModal";
@@ -13,8 +13,6 @@ export default function Home() {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const [activeTab, setActiveTab] = useState("profile");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,116 +43,13 @@ export default function Home() {
     );
   }
 
-  // ==========================
-  // LOGGED IN VIEW
-  // ==========================
+  // If user is already logged in, seamlessly forward them to the Dashboard view
   if (user) {
-    return (
-      <div className="min-h-screen bg-[#15161c] text-white flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-slate-900 border-r border-slate-700 p-6">
-          <h1 className="text-3xl font-bold mb-10">
-            Sync<span className="text-blue-400">UP</span>
-          </h1>
-
-          <div className="space-y-3">
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`w-full text-left p-3 rounded-lg transition ${
-                activeTab === "profile"
-                  ? "bg-green-600"
-                  : "bg-slate-800 hover:bg-slate-700"
-              }`}
-            >
-              My Profile
-            </button>
-
-            <button
-              onClick={() => setActiveTab("teams")}
-              className={`w-full text-left p-3 rounded-lg transition ${
-                activeTab === "teams"
-                  ? "bg-green-600"
-                  : "bg-slate-800 hover:bg-slate-700"
-              }`}
-            >
-              My Teams
-            </button>
-
-            <button
-              onClick={() => setActiveTab("leadership")}
-              className={`w-full text-left p-3 rounded-lg transition ${
-                activeTab === "leadership"
-                  ? "bg-green-600"
-                  : "bg-slate-800 hover:bg-slate-700"
-              }`}
-            >
-              Leadership
-            </button>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-10">
-          {activeTab === "profile" && (
-            <>
-              <h2 className="text-4xl font-bold mb-6">
-                My Profile
-              </h2>
-
-              <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
-                <p>
-                  <strong>Name:</strong>{" "}
-                  {user.firstName} {user.lastName}
-                </p>
-
-                <p className="mt-2">
-                  <strong>Email:</strong>{" "}
-                  {user.email}
-                </p>
-
-                <p className="mt-2">
-                  <strong>College:</strong>{" "}
-                  {user.college || "Not Added"}
-                </p>
-
-                <p className="mt-2">
-                  <strong>Bio:</strong>{" "}
-                  {user.bio || "Not Added"}
-                </p>
-              </div>
-            </>
-          )}
-
-          {activeTab === "teams" && (
-            <>
-              <h2 className="text-4xl font-bold mb-6">
-                My Teams
-              </h2>
-
-              <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
-                Teams will appear here.
-              </div>
-            </>
-          )}
-
-          {activeTab === "leadership" && (
-            <>
-              <h2 className="text-4xl font-bold mb-6">
-                Leadership
-              </h2>
-
-              <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
-                Leadership projects will appear here.
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    );
+    return <Navigate to="/dashboard" replace />;
   }
 
   // ==========================
-  // LANDING PAGE
+  // LANDING PAGE (Unauthenticated)
   // ==========================
   return (
     <div className="min-h-screen bg-[#15161c] text-white relative overflow-hidden">
@@ -198,7 +93,7 @@ export default function Home() {
           </p>
 
           <button
-            onClick={() => navigate("/teams")}
+            onClick={() => navigate("/dashboard")} // Keeps routing within intent
             className="mt-16 px-10 py-4 border-2 border-white rounded-xl text-xl font-semibold hover:bg-white hover:text-black transition-all duration-300"
           >
             Explore Teams
@@ -211,26 +106,28 @@ export default function Home() {
           onClose={() => setShowLogin(false)}
           onSuccess={() => {
             setShowLogin(false);
-            window.location.reload();
+            navigate("/dashboard");
           }}
           openSignup={() => {
             setShowLogin(false);
             setShowSignup(true);
           }}
-        />
+      />
       )}
 
       {showSignup && (
         <SignupModal
           onClose={() => setShowSignup(false)}
-          onSuccess={() => {
-            setShowSignup(false);
-            navigate("/complete-profile");
-          }}
+            onSuccess={() => {
+              setShowSignup(false);
+              navigate("/dashboard");
+            }
+          }
           openLogin={() => {
-            setShowSignup(false);
-            setShowLogin(true);
-          }}
+              setShowSignup(false);
+              setShowLogin(true);
+            }
+          }
         />
       )}
     </div>
