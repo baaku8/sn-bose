@@ -38,6 +38,7 @@ function App() {
 }
 
 
+
 // import { Routes, Route } from "react-router-dom";
 
 // import Home from "./pages/Home";
@@ -66,4 +67,7 @@ function App() {
 //   );
 // }
 
+export default App;
+
 // export default App;
+// >>>>>>> 0575f364b15503ed61dfa9db37591542329dc7ec
