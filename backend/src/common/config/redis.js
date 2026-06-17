@@ -1,12 +1,10 @@
-
-
 import { createClient } from 'redis';
 
 export const redisClient = createClient({
     username: 'default',
     password: process.env.REDIS_PASSWORD ,
     socket: {
-        host: process.env.REDIS_HOST ,
+        host: process.env.REDIS_HOST,
         port: process.env.REDIS_PORT
     }
 });
@@ -23,6 +21,3 @@ export const connectRedis = async () => {
         throw error; // We must throw the error so server.js knows it failed!
     }
 };
-
-
-
