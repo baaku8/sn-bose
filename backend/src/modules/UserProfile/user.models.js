@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please add a password'],
+    required: false,
     select: false // Prevents the password from being returned in API responses by default
   },
   profileImage: {
@@ -69,7 +69,10 @@ const userSchema = new mongoose.Schema({
       type: Boolean,
       default: false // e.g., false = completed project, true = currently working on it
     }
-  }]
+  }],
+  
+    googleId: { type: String, required: false },
+    avatar: { type: String, required: false }
 }, {
   timestamps: true // Automatically manages the 'createdAt' and 'updatedAt' fields
 });

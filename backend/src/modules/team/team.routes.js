@@ -11,6 +11,6 @@ teamRouter.get("/", getAllTeams);
 teamRouter.get("/team/:id", getTeamById);
 
 // Create Team Action
-teamRouter.post("/createTeam", userMiddleware,createTeam);
+teamRouter.post("/createTeam", userMiddleware, createTeam);
 
 export default teamRouter;
