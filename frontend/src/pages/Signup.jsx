@@ -20,7 +20,6 @@ function Signup() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  // Pulling global state from Redux
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
 
   const {
@@ -29,69 +28,53 @@ function Signup() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(signupSchema) });
 
-  // Clear errors on mount and redirect if already authenticated
-// 1. ONLY clear errors when the component first mounts (loads)
   useEffect(() => {
     dispatch(clearError());
-  }, [dispatch]); // Empty dependency array (plus dispatch) means this runs strictly ONCE
+  }, [dispatch]);
 
-  // 2. ONLY handle redirects when the authentication state changes
+  // Redirect to home if authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/'); 
     }
   }, [isAuthenticated, navigate]);
 
-  // Dispatch the Redux thunk instead of a local Axios call
-  // const onSubmit = (data) => {
-  //   dispatch(registerUser(data));
-  // };
-
-   const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
     try {
-      // .unwrap() forces the dispatch to act like a normal Promise!
-      const result = await dispatch(registerUser(data)).unwrap();
-      console.log("Signup Success:", result);
-      navigate('/');
+      await dispatch(registerUser(data)).unwrap();
+      navigate('/'); 
     } catch (err) {
-      // If it fails, this will immediately log the exact payload!
-      console.error("CAUGHT ERROR IN COMPONENT:", err);
+      console.error("Signup failed:", err);
     }
   };
-  // Google OAuth Success Handler
+
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       await axiosClient.post('user/google', {
         token: credentialResponse.credential
       });
       await dispatch(checkAuth());
-      navigate('/');
+      navigate('/'); 
     } catch (err) {
       console.error('Google registration failed:', err);
     }
   };
-
 
   const inputBaseStyle = "w-full bg-[#262626] border border-gray-600 rounded-lg px-4 py-2.5 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-[#cbbda6] focus:ring-1 focus:ring-[#cbbda6] transition-colors";
   const labelStyle = "block text-sm font-medium text-gray-300 mb-1"; 
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#201f1f] font-sans selection:bg-[#cbbda6]/30">
-      
-      {/* REDUCED: p-8 to p-6 */}
       <div className="w-full max-w-md bg-[#2e2d2d] rounded-2xl shadow-2xl p-6 border border-gray-700/50">
-        
-        {/* Header / Logo - REDUCED: mb-8 to mb-5 */}
         <div className="flex flex-col items-center mb-5">
           <div className="flex items-center gap-3 mb-1">
-            <h2 className="text-2xl font-bold text-white tracking-tight"> {/* Slightly reduced text size to text-2xl */}
+            <h2 className="text-2xl font-bold text-white tracking-tight">
               Team<span className="text-[#cbbda6]">Finder</span>
             </h2>
           </div>
           <p className="text-gray-400 text-sm">Create an account to start building.</p>
         </div>
 
-        {/* Global Redux Error Display */}
         {typeof error === 'string' && error.trim() !== '' && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg p-3 mb-4 flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,10 +84,7 @@ function Signup() {
           </div>
         )}
 
-        {/* REDUCED: space-y-5 to space-y-4 */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          
-          {/* First & Last Name Fields */}
           <div className="flex gap-4">
             <div className="w-1/2">
               <label className={labelStyle}>First Name</label>
@@ -114,9 +94,7 @@ function Signup() {
                 className={`${inputBaseStyle} ${errors.firstName ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`} 
                 {...register('firstName')}
               />
-              {errors.firstName && (
-                <span className="text-red-400 text-xs mt-1 block">{errors.firstName.message}</span>
-              )}
+              {errors.firstName && <span className="text-red-400 text-xs mt-1 block">{errors.firstName.message}</span>}
             </div>
             
             <div className="w-1/2">
@@ -127,13 +105,10 @@ function Signup() {
                 className={`${inputBaseStyle} ${errors.lastName ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`} 
                 {...register('lastName')}
               />
-              {errors.lastName && (
-                <span className="text-red-400 text-xs mt-1 block">{errors.lastName.message}</span>
-              )}
+              {errors.lastName && <span className="text-red-400 text-xs mt-1 block">{errors.lastName.message}</span>}
             </div>
           </div>
 
-          {/* Email Field */}
           <div>
             <label className={labelStyle}>Email</label>
             <input
@@ -142,12 +117,9 @@ function Signup() {
               className={`${inputBaseStyle} ${errors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`}
               {...register('email')}
             />
-            {errors.email && (
-              <span className="text-red-400 text-xs mt-1 block">{errors.email.message}</span>
-            )}
+            {errors.email && <span className="text-red-400 text-xs mt-1 block">{errors.email.message}</span>}
           </div>
 
-          {/* Password Field */}
           <div>
             <label className={labelStyle}>Password</label>
             <div className="relative">
@@ -157,7 +129,6 @@ function Signup() {
                 className={`${inputBaseStyle} pr-12 ${errors.password ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`}
                 {...register('password')}
               />
-
               <button
                 type="button"
                 className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-[#cbbda6] transition-colors p-1"
@@ -175,15 +146,11 @@ function Signup() {
                   </svg>
                 )}
               </button>
-
             </div>
-            {errors.password && (
-              <span className="text-red-400 text-xs mt-1 block">{errors.password.message}</span>
-            )}
+            {errors.password && <span className="text-red-400 text-xs mt-1 block">{errors.password.message}</span>}
           </div>
 
-          {/* Submit Button */}
-          <div className="pt-1"> {/* Reduced from pt-2 */}
+          <div className="pt-1"> 
             <button
               type="submit"
               className="w-full bg-[#f4f1ec] hover:bg-[#b5a790] text-[#262626] font-bold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-[#cbbda6]/10"
@@ -202,7 +169,6 @@ function Signup() {
           </div>
         </form>
 
-        {/* Google OAuth Section - REDUCED: my-6 to my-4 */}
         <div className="flex items-center my-4">
           <div className="flex-1 border-t border-gray-600"></div>
           <span className="px-3 text-gray-400 text-sm">OR</span>
@@ -220,7 +186,6 @@ function Signup() {
           />
         </div>
 
-        {/* Login Redirect - REDUCED: mt-8 pt-6 to mt-5 pt-4 */}
         <div className="text-center mt-5 pt-4 border-t border-gray-700/50">
           <span className="text-gray-400 text-sm">
             Already have an account?{' '}
@@ -229,7 +194,6 @@ function Signup() {
             </Link>
           </span>
         </div>
-        
       </div>
     </div>
   );

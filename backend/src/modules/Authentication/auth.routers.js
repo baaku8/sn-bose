@@ -3,6 +3,7 @@ import express from "express" ;
 import { userMiddleware } from "../UserProfile/user.middlewares.js";
 import { loginUser , logoutUser, registerUser , googleLogin   } from "./auth.controllers.js";
 const authRouter =  express.Router();
+import APIResponse from "../../common/utils/api-response.js";
 
 authRouter.post('/register', registerUser);
 authRouter.post('/login' , loginUser);
@@ -17,10 +18,7 @@ authRouter.get('/check', userMiddleware, (req, res) => {
         role: req.user.role
     };
 
-    res.status(200).json({
-        user: reply,
-        message: "Valid User"
-    });
+    return APIResponse.ok(res, "Valid User", { user: reply });
 });
 
 export default  authRouter;

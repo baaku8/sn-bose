@@ -25,25 +25,21 @@ function Login() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(loginSchema) });
 
-// 1. ONLY clear errors when the component first mounts (loads)
   useEffect(() => {
     dispatch(clearError());
-  }, [dispatch]); // Empty dependency array (plus dispatch) means this runs strictly ONCE
+  }, [dispatch]); 
 
-  // 2. ONLY handle redirects when the authentication state changes
+  // Redirect to home if authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/'); 
     }
   }, [isAuthenticated, navigate]);
 
   const onSubmit = async (data) => {
     try {
-      // Wait for the backend to confirm the login
       await dispatch(loginUser(data)).unwrap();
-      
-      // Instantly teleport the user to the Dashboard
-      navigate('/');
+      navigate('/'); 
     } catch (err) {
       console.error("Login failed:", err);
     }
@@ -55,7 +51,7 @@ function Login() {
         token: credentialResponse.credential
       });
       await dispatch(checkAuth());
-      navigate('/');
+      navigate('/'); 
     } catch (err) {
       console.error('Google verification failed:', err);
     }

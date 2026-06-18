@@ -1,47 +1,19 @@
-import { useEffect, useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
-import axios from "axios";
-
-import LoginModal from "../components/LoginModal";
-import SignupModal from "../components/SignupModal";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../authSlice"; // Make sure the path is correct
 
 export default function Home() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
-  const [showLogin, setShowLogin] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
-
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await axios.get("http://localhost:5001/user/me", {
-          withCredentials: true,
-        });
-        setUser(res.data.user);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center font-medium">
-        <span className="animate-pulse">Loading...</span>
-      </div>
-    );
-  }
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-50 selection:bg-neutral-800">
@@ -53,18 +25,39 @@ export default function Home() {
         </h1>
 
         <div className="flex items-center gap-6">
-          <button
-            onClick={() => setShowLogin(true)}
-            className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
-          >
-            Log in
-          </button>
-          <button
-            onClick={() => setShowSignup(true)}
-            className="px-5 py-2.5 rounded-lg bg-white text-black text-sm font-medium hover:bg-neutral-200 transition-colors"
-          >
-            Sign up
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
+              >
+                Go to Dashboard
+              </button>
+              
+              {/* NEW LOGOUT BUTTON */}
+              <button
+                onClick={handleLogout}
+                className="px-5 py-2.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-sm font-medium hover:bg-red-500/20 transition-colors"
+              >
+                Log out
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate("/login")}
+                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
+              >
+                Log in
+              </button>
+              <button
+                onClick={() => navigate("/signup")}
+                className="px-5 py-2.5 rounded-lg bg-white text-black text-sm font-medium hover:bg-neutral-200 transition-colors"
+              >
+                Sign up
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
@@ -79,42 +72,15 @@ export default function Home() {
           Connect with developers, designers, AI enthusiasts, and builders for your next project. Stop searching and start shipping.
         </p>
 
+        {/* Dynamic CTA Button */}
         <button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate(isAuthenticated ? "/dashboard" : "/signup")}
           className="mt-12 px-8 py-3.5 rounded-full border border-neutral-800 bg-neutral-900 text-white text-sm font-medium shadow-sm hover:border-neutral-700 hover:bg-neutral-800 transition-all"
         >
-          Explore Teams →
+          {isAuthenticated ? "Explore Teams →" : "Get Started →"}
         </button>
       </main>
-
-      {/* Modals */}
-      {showLogin && (
-        <LoginModal
-          onClose={() => setShowLogin(false)}
-          onSuccess={() => {
-            setShowLogin(false);
-            navigate("/dashboard");
-          }}
-          openSignup={() => {
-            setShowLogin(false);
-            setShowSignup(true);
-          }}
-        />
-      )}
-
-      {showSignup && (
-        <SignupModal
-          onClose={() => setShowSignup(false)}
-          onSuccess={() => {
-            setShowSignup(false);
-            navigate("/dashboard");
-          }}
-          openLogin={() => {
-            setShowSignup(false);
-            setShowLogin(true);
-          }}
-        />
-      )}
+      
     </div>
   );
 }

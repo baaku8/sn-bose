@@ -1,4 +1,3 @@
-
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axiosClient from './utils/axiosClient'
 
@@ -41,8 +40,11 @@ export const checkAuth = createAsyncThunk(
   'auth/check',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.get('/user/check');
-      return data.user;
+      const response = await axiosClient.get('/user/check',{
+        withCredentials: true
+      });
+      // FIXED: Added the exact same data extraction fallback as login/register
+      return response.data?.data?.user || response.data?.user;
     } catch (error) {
       return rejectWithValue(
          error.response?.data?.message || error.message || 'Auth check failed'
@@ -55,7 +57,9 @@ export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await axiosClient.post('/user/logout');
+      await axiosClient.post('/user/logout', {}, {
+        withCredentials: true // FIXED: Ensures the cookie is sent so the backend can destroy it
+      });
       return null;
     } catch (error) {
       return rejectWithValue(
@@ -67,7 +71,6 @@ export const logoutUser = createAsyncThunk(
 
 const authSlice = createSlice({
   name: 'auth',
-  // 1. ADDED isCheckingAuth to initial state
   initialState: {
     user: null,
     isAuthenticated: false,
@@ -82,7 +85,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register User Cases (Uses normal 'loading')
+      // Register User Cases 
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -99,7 +102,7 @@ const authSlice = createSlice({
         state.user = null;
       })
   
-      // Login User Cases (Uses normal 'loading')
+      // Login User Cases 
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -116,7 +119,7 @@ const authSlice = createSlice({
         state.user = null;
       })
   
-      // Check Auth Cases (UPDATED: Uses 'isCheckingAuth' instead of 'loading')
+      // Check Auth Cases 
       .addCase(checkAuth.pending, (state) => {
         state.isCheckingAuth = true; 
         state.error = null;
@@ -124,17 +127,15 @@ const authSlice = createSlice({
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isCheckingAuth = false;
         state.isAuthenticated = !!action.payload;
-        state.user = action.payload;
+        state.user = action.payload || null;
       })
       .addCase(checkAuth.rejected, (state, action) => {
         state.isCheckingAuth = false;
-        // Keep this commented out so it doesn't show errors on normal page loads
-        // state.error = action.payload || 'Something went wrong';
         state.isAuthenticated = false;
         state.user = null;
       })
   
-      // Logout User Cases (Uses normal 'loading')
+      // Logout User Cases
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
         state.error = null;
