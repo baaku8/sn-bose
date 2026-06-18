@@ -1,17 +1,19 @@
 import axiosClient from './axiosClient';
 
 export const dashboardAPI = {
-  // --- Profile Routes ---
-  getProfile: () => axiosClient.get('/profile/view'), // NEW: Fetch existing profile
+  getProfile: () => axiosClient.get('/profile/view'),
   updateProfile: (data) => axiosClient.put('/profile/update', data),
-
-  // --- Leader Controls ---
+  uploadAvatar: (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return axiosClient.post('/profile/upload-avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
   getOwnedTeams: () => axiosClient.get('/dashboard/manageMyTeams'),
   getNotifications: () => axiosClient.get('/dashboard/manageNotifications'),
   handleJoinRequest: (requestId, action) => 
     axiosClient.put(`/dashboard/manageNotifications/${requestId}`, { action }),
-
-  // --- User Controls ---
   getJoinedTeams: () => axiosClient.get('/dashboard/user-teams/joined-teams'),
   getSentRequests: () => axiosClient.get('/dashboard/user-teams/all-requests'),
   createJoinRequest: (teamId, message) => 

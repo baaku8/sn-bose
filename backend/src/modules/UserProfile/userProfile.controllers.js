@@ -1,6 +1,7 @@
 import User from "./user.models.js";
 import APIError from "../../common/utils/api-error.js";
 import APIResponse from "../../common/utils/api-response.js";
+import { uploadToCloudinary } from '../../common/utils/upload.middleware.js';
 
 // 1. UPDATE PROFILE
 export const updateProfile = async (req, res, next) => {
@@ -9,7 +10,7 @@ export const updateProfile = async (req, res, next) => {
         const userId = req.user._id;
 
         // Fields we allow the user to update directly in this route
-        const allowedUpdates = ['firstName','lastName' , 'bio', 'skills', 'interests', 'college', 'socialLinks', 'isAvailable', 'previousWorks'];
+        const allowedUpdates = ['firstName','lastName' , 'bio', 'avatar','skills', 'interests', 'college', 'socialLinks', 'isAvailable', 'previousWorks'];
         
         const updates = {};
         // Only extract fields that are present in the request body and are allowed
@@ -70,5 +71,26 @@ export const deleteProfile = async (req, res, next) => {
         return APIResponse.ok(res, "User account deleted successfully");
     } catch (err) {
         next(err);
+    }
+};
+
+export const uploadAvatar = async (req, res, next) => {
+    try {
+        if (!req.file) throw APIError.badRequest("No image file provided");
+        
+        console.log("File received by multer:", req.file.originalname, "Size:", req.file.size); // Debug log 1
+        
+        const result = await uploadToCloudinary(req.file.buffer, "syncup_avatars");
+        
+        console.log("Cloudinary Success URL:", result.secure_url); // Debug log 2
+
+        return APIResponse.ok(res, "Avatar uploaded successfully", {
+            avatarUrl: result.secure_url
+        });
+    } catch (err) {
+        console.error("Cloudinary Upload Error Details:", err);
+        
+        // TEMPORARY FIX: Send the actual error message to the frontend so you can see it!
+        next(APIError.internalServiceError(`Cloudinary Error: ${err.message || "Unknown error"}`));
     }
 };

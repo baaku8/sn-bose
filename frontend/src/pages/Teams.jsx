@@ -1,4 +1,4 @@
-import TeamCard from "../components/TeamCard";
+import TeamCard from "../components/dashboard/TeamCard";
 
 export default function Teams() {
   const teams = [
