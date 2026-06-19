@@ -60,23 +60,28 @@ function Signup() {
     }
   };
 
-  const inputBaseStyle = "w-full bg-[#262626] border border-gray-600 rounded-lg px-4 py-2.5 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-[#cbbda6] focus:ring-1 focus:ring-[#cbbda6] transition-colors";
-  const labelStyle = "block text-sm font-medium text-gray-300 mb-1"; 
+  // NEW THEME: Stealthy inputs with sharp white focus rings
+  const inputBaseStyle = "w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors";
+  const labelStyle = "block text-sm font-medium text-gray-400 mb-1"; 
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#201f1f] font-sans selection:bg-[#cbbda6]/30">
-      <div className="w-full max-w-md bg-[#2e2d2d] rounded-2xl shadow-2xl p-6 border border-gray-700/50">
-        <div className="flex flex-col items-center mb-5">
+    // NEW THEME: Pure black background
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black font-sans selection:bg-white/30">
+      
+      {/* NEW THEME: Ultra-dark gray card with subtle border */}
+      <div className="w-full max-w-md bg-[#0a0a0a] rounded-2xl p-6 border border-[#222]">
+        
+        <div className="flex flex-col items-center mb-6">
           <div className="flex items-center gap-3 mb-1">
             <h2 className="text-2xl font-bold text-white tracking-tight">
-              Team<span className="text-[#cbbda6]">Finder</span>
+              TeamFinder
             </h2>
           </div>
-          <p className="text-gray-400 text-sm">Create an account to start building.</p>
+          <p className="text-gray-500 text-sm">Create an account to start building.</p>
         </div>
 
         {typeof error === 'string' && error.trim() !== '' && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg p-3 mb-4 flex items-center gap-3">
+          <div className="bg-[#1a0505] border border-[#331111] text-[#ff4444] rounded-lg p-3 mb-4 flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -91,10 +96,10 @@ function Signup() {
               <input
                 type="text"
                 placeholder="John"
-                className={`${inputBaseStyle} ${errors.firstName ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`} 
+                className={`${inputBaseStyle} ${errors.firstName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`} 
                 {...register('firstName')}
               />
-              {errors.firstName && <span className="text-red-400 text-xs mt-1 block">{errors.firstName.message}</span>}
+              {errors.firstName && <span className="text-red-500 text-xs mt-1 block">{errors.firstName.message}</span>}
             </div>
             
             <div className="w-1/2">
@@ -102,10 +107,10 @@ function Signup() {
               <input
                 type="text"
                 placeholder="Doe"
-                className={`${inputBaseStyle} ${errors.lastName ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`} 
+                className={`${inputBaseStyle} ${errors.lastName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`} 
                 {...register('lastName')}
               />
-              {errors.lastName && <span className="text-red-400 text-xs mt-1 block">{errors.lastName.message}</span>}
+              {errors.lastName && <span className="text-red-500 text-xs mt-1 block">{errors.lastName.message}</span>}
             </div>
           </div>
 
@@ -114,10 +119,10 @@ function Signup() {
             <input
               type="email"
               placeholder="john@example.com"
-              className={`${inputBaseStyle} ${errors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`}
+              className={`${inputBaseStyle} ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
               {...register('email')}
             />
-            {errors.email && <span className="text-red-400 text-xs mt-1 block">{errors.email.message}</span>}
+            {errors.email && <span className="text-red-500 text-xs mt-1 block">{errors.email.message}</span>}
           </div>
 
           <div>
@@ -126,12 +131,12 @@ function Signup() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className={`${inputBaseStyle} pr-12 ${errors.password ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`}
+                className={`${inputBaseStyle} pr-12 ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                 {...register('password')}
               />
               <button
                 type="button"
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-[#cbbda6] transition-colors p-1"
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-white transition-colors p-1"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -147,18 +152,19 @@ function Signup() {
                 )}
               </button>
             </div>
-            {errors.password && <span className="text-red-400 text-xs mt-1 block">{errors.password.message}</span>}
+            {errors.password && <span className="text-red-500 text-xs mt-1 block">{errors.password.message}</span>}
           </div>
 
-          <div className="pt-1"> 
+          <div className="pt-2"> 
+            {/* NEW THEME: High contrast solid white primary button */}
             <button
               type="submit"
-              className="w-full bg-[#f4f1ec] hover:bg-[#b5a790] text-[#262626] font-bold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-[#cbbda6]/10"
+              className="w-full bg-white hover:bg-gray-200 text-black font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#262626]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -169,10 +175,10 @@ function Signup() {
           </div>
         </form>
 
-        <div className="flex items-center my-4">
-          <div className="flex-1 border-t border-gray-600"></div>
-          <span className="px-3 text-gray-400 text-sm">OR</span>
-          <div className="flex-1 border-t border-gray-600"></div>
+        <div className="flex items-center my-6">
+          <div className="flex-1 border-t border-[#333]"></div>
+          <span className="px-3 text-[#555] text-sm">OR</span>
+          <div className="flex-1 border-t border-[#333]"></div>
         </div>
 
         <div className="flex justify-center">
@@ -186,10 +192,10 @@ function Signup() {
           />
         </div>
 
-        <div className="text-center mt-5 pt-4 border-t border-gray-700/50">
-          <span className="text-gray-400 text-sm">
+        <div className="text-center mt-6 pt-5 border-t border-[#222]">
+          <span className="text-gray-500 text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#d7bd53] hover:text-white font-semibold transition-colors">
+            <Link to="/login" className="text-white hover:text-gray-300 font-medium transition-colors">
               Login
             </Link>
           </span>
