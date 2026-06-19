@@ -1,0 +1,80 @@
+POST http://localhost:5001/user/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "firstName": "xyz",
+    "lastName": "xyz",
+    "email": "xyz@gmail.com",
+    "password": "Password123"
+}
+
+###
+
+POST http://localhost:5001/user/login HTTP/1.1
+Content-Type: application/json
+
+{
+
+    "email": "hrishi@gmail.com",
+    "password": "Password123"
+
+}
+
+###
+POST http://localhost:5001/user/logout HTTP/1.1
+
+
+
+###
+POST http://localhost:5001/profile/view HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2YTI5NjI3MzlhYzUzY2U5ZDY1MDQwNjIiLCJlbWFpbCI6ImhyaXNoaUBnbWFpbC5jb20iLCJpYXQiOjE3ODE4ODU2OTIsImV4cCI6MTc4MTg4OTI5Mn0.Sn3JTHUVW2X_QzSK1uR_ViZUod6khbpNteH5v2SbfMg; Path=/; HttpOnly; Expires=Fri, 19 Jun 2026 17:14:52 GMT;"
+}
+
+
+###
+PUT http://localhost:5001/profile/update HTTP/1.1
+Content-Type: application/json
+
+{
+    "skills": [
+        "React",
+        "NodeJS",
+        "MongoDB",
+        "Express"
+    ],
+    "interests": [
+        "Web Development",
+        "Open Source"
+    ]
+}
+
+
+###
+POST http://localhost:5001/createTeam HTTP/1.1
+Content-Type: application/json
+
+{
+    "teamName": "Code Warriors3",
+    "description": "MERN Stack Team3",
+    "contactEmail": "team2@gmail.com",
+    "leader": "6a2962739ac53ce9d6504062",
+    "maxMembers": 5
+}
+
+
+
+###
+GET http://localhost:5001/ HTTP/1.1
+Content-Type: application/json
+
+
+
+###
+GET http://localhost:5001/team/6a356c23226909d4de9e0fdd HTTP/1.1
+
+
+
+
