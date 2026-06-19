@@ -57,21 +57,21 @@ function Login() {
     }
   };
 
-  const inputBaseStyle = "w-full bg-[#262626] border border-gray-600 rounded-lg px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-[#cbbda6] focus:ring-1 focus:ring-[#cbbda6] transition-colors";
-  const labelStyle = "block text-sm font-medium text-gray-300 mb-1.5";
+  const inputBaseStyle = "w-full bg-[#111] border border-[#333] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors";
+  const labelStyle = "block text-sm font-medium text-gray-400 mb-1.5";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#201f1f] font-sans selection:bg-[#cbbda6]/30">
-      <div className="w-full max-w-md bg-[#2e2d2d] rounded-2xl shadow-2xl p-8 border border-gray-700/50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black font-sans selection:bg-white/30">
+      <div className="w-full max-w-md bg-[#0a0a0a] rounded-2xl p-8 border border-[#222]">
         <div className="flex flex-col items-center mb-8">
           <h2 className="text-3xl font-bold text-white tracking-tight">
-            Team<span className="text-[#cbbda6]">Finder</span>
+            TeamFinder
           </h2>
-          <p className="text-gray-400 text-sm mt-1">Welcome back! Please enter your details.</p>
+          <p className="text-gray-500 text-sm mt-1">Welcome back! Please enter your details.</p>
         </div>
 
         {typeof error === 'string' && error.trim() !== '' && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg p-3 mb-6 flex items-center gap-3">
+          <div className="bg-[#1a0505] border border-[#331111] text-[#ff4444] rounded-lg p-3 mb-6 flex items-center gap-3">
             <span className="text-sm font-medium">{error}</span>
           </div>
         )}
@@ -82,10 +82,10 @@ function Login() {
             <input
               type="email"
               placeholder="john@example.com"
-              className={`${inputBaseStyle} ${errors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`} 
+              className={`${inputBaseStyle} ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`} 
               {...register('email')}
             />
-            {errors.email && <span className="text-red-400 text-sm mt-1.5 block">{errors.email.message}</span>}
+            {errors.email && <span className="text-red-500 text-sm mt-1.5 block">{errors.email.message}</span>}
           </div>
 
           <div>
@@ -94,12 +94,12 @@ function Login() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className={`${inputBaseStyle} pr-12 ${errors.password ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`}
+                className={`${inputBaseStyle} pr-12 ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                 {...register('password')}
               />
               <button
                 type="button"
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-[#cbbda6] transition-colors p-1"
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-white transition-colors p-1"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -114,29 +114,37 @@ function Login() {
                 )}
               </button>
             </div>
-            {errors.password && <span className="text-red-400 text-sm mt-1.5 block">{errors.password.message}</span>}
+            {errors.password && <span className="text-red-500 text-sm mt-1.5 block">{errors.password.message}</span>}
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full bg-[#f1efe6] hover:bg-[#b5a790] text-[#262626] font-bold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-70" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            <button type="submit" className="w-full bg-white hover:bg-gray-200 text-black font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-70 flex justify-center items-center" disabled={loading}>
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Logging in...
+                </>
+              ) : 'Login'}
             </button>
           </div>
         </form>
 
         <div className="flex items-center my-6">
-          <div className="flex-1 border-t border-gray-600"></div>
-          <span className="px-3 text-gray-400 text-sm">OR</span>
-          <div className="flex-1 border-t border-gray-600"></div>
+          <div className="flex-1 border-t border-[#333]"></div>
+          <span className="px-3 text-[#555] text-sm">OR</span>
+          <div className="flex-1 border-t border-[#333]"></div>
         </div>
 
         <div className="flex justify-center">
           <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.error('Google Login Failed')} theme="filled_black" shape="rectangular" text="continue_with" size="large" />
         </div>
 
-        <div className="text-center mt-8 pt-6 border-t border-gray-700/50">
-          <span className="text-gray-400 text-sm">
-            Don't have an account? <Link to="/signup" className="text-[#dcab5b] font-semibold">Sign Up</Link>
+        <div className="text-center mt-8 pt-6 border-t border-[#222]">
+          <span className="text-gray-500 text-sm">
+            Don't have an account? <Link to="/signup" className="text-white font-medium hover:text-gray-300 transition-colors">Sign Up</Link>
           </span>
         </div>
       </div>
