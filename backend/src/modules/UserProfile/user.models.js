@@ -62,7 +62,7 @@ const userSchema = new mongoose.Schema({
   previousWorks: [{
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Project', // Links this ID to the 'Project' database collection
+      ref: 'Team', // Links this ID to the 'Project' database collection
       required: true
     },
     active: {

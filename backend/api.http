@@ -1,0 +1,153 @@
+POST http://localhost:5001/user/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "firstName": "xyz",
+    "lastName": "xyz",
+    "email": "xyz@gmail.com",
+    "password": "Password123"
+}
+
+###
+
+POST http://localhost:5001/user/login HTTP/1.1
+Content-Type: application/json
+
+{
+
+    "email": "xyz@gmail.com",
+    "password": "Password123"
+
+}
+
+###
+POST http://localhost:5001/user/logout HTTP/1.1
+
+
+
+###
+GET http://localhost:5001/profile/view HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2YTI5NjI3MzlhYzUzY2U5ZDY1MDQwNjIiLCJlbWFpbCI6ImhyaXNoaUBnbWFpbC5jb20iLCJpYXQiOjE3ODE5NzE0MjYsImV4cCI6MTc4MTk3NTAyNn0.pxt8fqp6Kl4W7eijiOlPKT6AO4ddFSqF2cmMAd28QFE; Max-Age=3600; Path=/; Expires=Sat, 20 Jun 2026 17:03:46 GMT; HttpOnly; SameSite=Lax"
+}
+
+
+###
+PUT http://localhost:5001/profile/update HTTP/1.1
+Content-Type: application/json
+
+{
+    "skills": [
+        "React",
+        "NodeJS",
+        "MongoDB",
+        "Express",
+        "Typescript"
+    ],
+    "interests": [
+        "Web Development",
+        "Open Source"
+    ]
+}
+
+
+###
+POST http://localhost:5001/createTeam HTTP/1.1
+Content-Type: application/json
+
+{
+    "teamName": "Codersss",
+    "description": "....",
+    "contactEmail": "team@gmail.com",
+    "leader": "6a2962739ac53ce9d6504062",
+    "maxMembers": 5
+}
+
+
+
+###
+GET http://localhost:5001/ HTTP/1.1
+Content-Type: application/json
+
+
+
+###
+GET http://localhost:5001/team/6a36bb1419441519d1831205 HTTP/1.1
+
+
+### ==========================================
+### DASHBOARD: USER ACTIONS (JOINING & LEAVING)
+### ==========================================
+
+### 1. Send Join Request
+POST http://localhost:5001/dashboard/user-teams/create-request HTTP/1.1
+Content-Type: application/json
+
+{
+    "teamId": "6a36bccf19441519d1831206", 
+    "message": "I have experience with the MERN stack and would love to contribute to this project!"
+}
+
+### 2. Get All My Sent Requests
+GET http://localhost:5001/dashboard/user-teams/all-requests HTTP/1.1
+
+### 3. Get Teams I have Joined
+GET http://localhost:5001/dashboard/user-teams/joined-teams HTTP/1.1
+
+### 4. Leave a Team
+DELETE http://localhost:5001/dashboard/user-teams/6a36bb1419441519d1831205/leave HTTP/1.1
+
+
+### ==========================================
+### DASHBOARD: LEADER ACTIONS (MANAGING TEAMS)
+### ==========================================
+
+### 5. Get All Teams I Manage
+GET http://localhost:5001/dashboard/manageMyTeams HTTP/1.1
+
+### 6. Get Specific Team Details for Editing
+GET http://localhost:5001/dashboard/manageMyTeams/team/6a36bb1419441519d1831205 HTTP/1.1
+
+### 7. Update Team Details
+PUT http://localhost:5001/dashboard/manageMyTeams/updateTeam/6a36bb1419441519d1831205 HTTP/1.1
+Content-Type: application/json
+
+{
+    "teamName": "Updated Team Name",
+    "description": "Updated description for the project.",
+    "category": "AI/ML",
+    "mode": "Hybrid",
+    "maxMembers": 6,
+    "status": "Recruiting"
+}
+
+### 8. Remove a Member from the Team
+# Replace teamId and memberId with actual ObjectIds
+DELETE http://localhost:5001/dashboard/manageMyTeams/6a36bb1419441519d1831205/member/6a2962739ac53ce9d6504062 HTTP/1.1
+
+
+### ==========================================
+### DASHBOARD: NOTIFICATIONS (ACCEPT/REJECT)
+### ==========================================
+
+### 9. Get Pending Join Requests (Action Center)
+GET http://localhost:5001/dashboard/manageNotifications HTTP/1.1
+
+### 10. Handle Join Request (Accept)
+# Replace {requestId} with the actual JoinRequest _id from the fetch above
+PUT http://localhost:5001/dashboard/manageNotifications/6a36cc2519441519d1831209 HTTP/1.1
+Content-Type: application/json
+
+{
+    "action": "accept" 
+}
+
+### 11. Handle Join Request (Reject)
+PUT http://localhost:5001/dashboard/manageNotifications/6a36cc2519441519d1831209 HTTP/1.1
+Content-Type: application/json
+
+{
+    "action": "reject" 
+}

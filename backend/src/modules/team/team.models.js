@@ -8,28 +8,19 @@ const teamSchema = new mongoose.Schema(
             trim: true,
             maxlength: 50,
         },
-
         description: {
             type: String,
-            maxlength: 1000,
+            maxlength: 2000,
         },
-
         leader: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
         },
-
-        project: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Project",
-        },
-
         members: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         }],
-
         maxMembers: {
             type: Number,
             default: 5,
@@ -37,11 +28,7 @@ const teamSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: [
-                "Recruiting",
-                "Completed",
-                "Cancelled",
-            ],
+            enum: ["Recruiting", "Completed", "Cancelled"],
             default: "Recruiting",
         },
         contactEmail: {
@@ -50,6 +37,27 @@ const teamSchema = new mongoose.Schema(
             lowercase: true,
             trim: true,
         },
+        category: {
+            type: String,
+            enum: [
+                "Web Development", "Mobile Development", "AI/ML", "Blockchain",
+                "Cyber Security", "Open Source", "Research", "Hackathon", "Other",
+            ],
+            default: "Web Development",
+        },
+        technologies: [
+            {
+                type: String,
+                trim: true,
+            },
+        ],
+        mode: {
+            type: String,
+            enum: ["Online", "Offline", "Hybrid"],
+            default: "Online",
+        },
+        githubLink: String,
+        demoLink: String,
     },
     {
         timestamps: true,
@@ -57,5 +65,4 @@ const teamSchema = new mongoose.Schema(
 );
 
 const Team = mongoose.model("Team", teamSchema);
-
 export default Team;

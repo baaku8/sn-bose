@@ -9,6 +9,7 @@ import express from "express";
 import { connectRedis } from "./src/common/config/redis.js";
 import cookieParser from "cookie-parser";
 import cors from 'cors' ;
+import router from "./src/modules/dashboard/dashboard.routes.js";
 
 
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use(cors({
 app.use('/user', authRouter);
 app.use('/profile' , profileRouter );
 app.use('/',teamRouter)
+app.use('/dashboard',router);
 
 app.use((err, req, res, next) => {
     // Check if it's our custom APIError, otherwise default to 500

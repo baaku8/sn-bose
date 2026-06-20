@@ -1,19 +1,20 @@
 import Team from "../team/team.models.js";
-import Project from "../project/project.models.js";
 import APIError from "../../common/utils/api-error.js";
 import JoinRequest from "../joinRequest/joinRequest.models.js";
 
-// ----- LEADER CONTROLS -----
+// ==========================================
+// ----- LEADER CONTROLS (OWNED TEAMS) ------
+// ==========================================
 
 export const fetchTeamsByLeader = async (userId) => {
     const teams = await Team.find({ leader: userId })
-        .select("teamName tagline avatar status maxMembers members openRoles")
+        .select("teamName description tagline avatar status maxMembers members openRoles")
         .lean(); 
 
     const formattedTeams = teams.map(team => ({
         id: team._id,
         teamName: team.teamName,
-        tagline: team.tagline,
+        tagline: team.description || team.tagline, // Using merged description
         avatar: team.avatar,
         status: team.status,
         currentSize: team.members ? team.members.length : 0,
@@ -31,91 +32,96 @@ export const updateTeamAndProject = async (teamId, userId, payload) => {
         throw APIError.notFound("Team not found or you do not have permission to edit it.");
     }
 
-    const allowedTeamFields = [
+    // Combine all allowed fields into one list
+    const allowedFields = [
         "teamName", "description", "avatar", "maxMembers", 
-        "status", "openRoles", "contactEmail"
-    ];
-    const allowedProjectFields = [
-        "title", "description", "category", "technologies", 
-        "mode", "githubLink", "demoLink"
+        "status", "openRoles", "contactEmail", "category", 
+        "technologies", "mode", "githubLink", "demoLink"
     ];
 
-    const filteredTeamData = {};
-    if (payload.teamData) {
-        Object.keys(payload.teamData).forEach((key) => {
-            if (allowedTeamFields.includes(key)) {
-                filteredTeamData[key] = payload.teamData[key];
-            }
-        });
-    }
+    const updateData = {};
+    
+    // Fallback: Support both flat payloads and the old { teamData: {}, projectData: {} } format
+    const incomingData = { ...(payload.teamData || {}), ...(payload.projectData || {}), ...payload };
 
-    const filteredProjectData = {};
-    if (payload.projectData) {
-        Object.keys(payload.projectData).forEach((key) => {
-            if (allowedProjectFields.includes(key)) {
-                filteredProjectData[key] = payload.projectData[key];
-            }
-        });
-    }
+    Object.keys(incomingData).forEach((key) => {
+        if (allowedFields.includes(key)) {
+            updateData[key] = incomingData[key];
+        }
+    });
 
-    let updatedTeam = team;
-    let updatedProject = null;
+    const updatedTeam = await Team.findByIdAndUpdate(
+        teamId,
+        { $set: updateData },
+        { new: true, runValidators: true }
+    );
 
-    if (Object.keys(filteredTeamData).length > 0) {
-        updatedTeam = await Team.findByIdAndUpdate(
-            teamId,
-            { $set: filteredTeamData },
-            { new: true, runValidators: true }
-        );
-    }
-
-    if (Object.keys(filteredProjectData).length > 0 && team.project) {
-        updatedProject = await Project.findByIdAndUpdate(
-            team.project, 
-            { $set: filteredProjectData },
-            { new: true, runValidators: true }
-        );
-    }
-
-    return {
-        team: updatedTeam,
-        project: updatedProject
-    };
+    return { team: updatedTeam }; 
 };
 
 export const getTeamAndProjectForEdit = async (teamId, userId) => {
-    const teamDetails = await Team.findOne({ _id: teamId, leader: userId })
-        .populate("project")
-        .lean();
-
+    const teamDetails = await Team.findOne({ _id: teamId, leader: userId }).lean();
     if (!teamDetails) {
         throw APIError.notFound("Team not found or unauthorized access.");
     }
-
     return teamDetails;
 };
 
+// export const getPendingRequests = async (leaderId) => {
+//     const requests = await JoinRequest.find({ receiver: leaderId, status: "Pending" })
+//         .populate("sender", "firstName lastName avatar skills bio")
+//         .populate("team", "teamName maxMembers members")
+//         .sort({ createdAt: -1 })
+//         .lean();
+
+//     const notifications = requests.map(req => {
+//         const spotsLeft = req.team.maxMembers - (req.team.members ? req.team.members.length : 0);
+//         return {
+//             requestId: req._id,
+//             teamId: req.team._id,
+//             teamName: req.team.teamName,
+//             spotsLeft: spotsLeft,
+//             message: req.message,
+//             requestedAt: req.createdAt,
+//             requester: {
+//                 id: req.sender._id,
+//                 name: `${req.sender.firstName} ${req.sender.lastName}`,
+//                 avatar: req.sender.avatar || "default-avatar.png",
+//                 skills: req.sender.skills || [], 
+//                 bio: req.sender.bio || "No bio provided",
+//             }
+//         };
+//     });
+
+//     return notifications;
+// };
 export const getPendingRequests = async (leaderId) => {
-    // FIXED: Populating firstName and lastName instead of "name"
     const requests = await JoinRequest.find({ receiver: leaderId, status: "Pending" })
         .populate("sender", "firstName lastName avatar skills bio")
         .populate("team", "teamName maxMembers members")
         .sort({ createdAt: -1 })
         .lean();
 
-    const notifications = requests.map(req => {
-        const spotsLeft = req.team.maxMembers - req.team.members.length;
+    // STRICT SAFETY CHECK: Filter out requests where the team or sender no longer exists in the DB
+    const validRequests = requests.filter(req => req.team != null && req.sender != null);
+
+    const notifications = validRequests.map(req => {
+        // Safe fallbacks for all calculations
+        const maxMembers = req.team.maxMembers || 5;
+        const currentMembers = req.team.members ? req.team.members.length : 0;
+        const spotsLeft = maxMembers - currentMembers;
+
         return {
             requestId: req._id,
             teamId: req.team._id,
-            teamName: req.team.teamName,
+            teamName: req.team.teamName || "Unnamed Team",
             spotsLeft: spotsLeft,
-            message: req.message,
+            message: req.message || "",
             requestedAt: req.createdAt,
             requester: {
                 id: req.sender._id,
-                // FIXED: String interpolation for first and last name
-                name: `${req.sender.firstName} ${req.sender.lastName}`,
+                // Safely handle missing names
+                name: `${req.sender.firstName || 'Unknown'} ${req.sender.lastName || 'User'}`.trim(),
                 avatar: req.sender.avatar || "default-avatar.png",
                 skills: req.sender.skills || [], 
                 bio: req.sender.bio || "No bio provided",
@@ -125,12 +131,9 @@ export const getPendingRequests = async (leaderId) => {
 
     return notifications;
 };
-
 export const resolveJoinRequest = async (requestId, leaderId, action) => {
     const joinRequest = await JoinRequest.findOne({ 
-        _id: requestId, 
-        receiver: leaderId, 
-        status: "Pending" 
+        _id: requestId, receiver: leaderId, status: "Pending" 
     });
 
     if (!joinRequest) {
@@ -147,10 +150,8 @@ export const resolveJoinRequest = async (requestId, leaderId, action) => {
             throw APIError.badRequest("Team is already at maximum capacity.");
         }
 
-        team.members.push({
-            user: joinRequest.sender,
-            role: "Member"
-        });
+        // Push ONLY the User ObjectId to the members array
+        team.members.push(joinRequest.sender);
 
         if (team.members.length === team.maxMembers) {
             team.status = "Full";
@@ -166,49 +167,68 @@ export const resolveJoinRequest = async (requestId, leaderId, action) => {
     return `Request successfully ${action}ed.`; 
 };
 
-// ----- USER CONTROLS -----
+export const removeTeamMember = async (teamId, memberId, leaderId) => {
+    const team = await Team.findOne({ _id: teamId, leader: leaderId });
+    if (!team) throw APIError.notFound("Team not found or unauthorized.");
+
+    if (memberId === leaderId.toString()) {
+        throw APIError.badRequest("You cannot remove yourself as the leader.");
+    }
+
+    const initialLength = team.members.length;
+    // Filter out the specific member ID
+    team.members = team.members.filter(mId => mId.toString() !== memberId.toString());
+
+    if (team.members.length === initialLength) {
+        throw APIError.notFound("Member not found in this team.");
+    }
+
+    // Open recruitment if team was full
+    if (team.status === "Full") team.status = "Recruiting";
+    
+    await team.save();
+    return team;
+};
+
+// ==========================================
+// ------ USER CONTROLS (JOINED TEAMS) ------
+// ==========================================
 
 export const getJoinedTeams = async (userId) => {
-    // FIXED: Populating firstName and lastName instead of "name"
     const teams = await Team.find({ 
-        "members.user": userId,
+        members: userId, // Search the array of ObjectIds directly
         leader: { $ne: userId } 
     })
-    .populate("leader", "firstName lastName avatar email") 
-    .populate("project", "title category status githubLink mode") 
-    .select("-joinRequests -openRoles") 
+    .populate("leader", "firstName lastName avatar email")
+    .select("-joinRequests")
     .sort({ updatedAt: -1 })
-    .lean();
+    .lean(); 
 
     if (!teams) {
         throw APIError.internalServiceError("Failed to fetch joined teams.");
     }
 
     const formattedTeams = teams.map(team => {
-        const userMemberData = team.members.find(
-            member => member.user.toString() === userId.toString()
-        );
-
         return {
             teamId: team._id,
             teamName: team.teamName,
             avatar: team.avatar || "default-team.png",
-            tagline: team.tagline,
+            tagline: team.description || team.tagline, // Fallback to merged description
             status: team.status,
-            myRole: userMemberData ? userMemberData.role : "Member",
+            myRole: "Member",
             leader: {
-                // FIXED: String interpolation for first and last name
                 name: `${team.leader.firstName} ${team.leader.lastName}`,
                 email: team.leader.email,
                 avatar: team.leader.avatar || "default-avatar.png"
             },
-            project: team.project ? {
-                id: team.project._id,
-                title: team.project.title,
-                category: team.project.category,
-                mode: team.project.mode
-            } : null,
-            teamSize: team.members.length,
+            // SHIM: Reconstruct the 'project' object so the frontend UI doesn't crash
+            project: {
+                id: team._id,
+                title: team.teamName,
+                category: team.category || "Web Development",
+                mode: team.mode || "Online"
+            },
+            teamSize: team.members ? team.members.length : 0,
             maxMembers: team.maxMembers,
             contactEmail: team.contactEmail
         };
@@ -217,10 +237,47 @@ export const getJoinedTeams = async (userId) => {
     return formattedTeams;
 };
 
+// export const getUserSentRequests = async (userId) => {
+//     const requests = await JoinRequest.find({ sender: userId })
+//         .populate("team", "teamName avatar tagline status maxMembers members")
+//         .populate("receiver", "firstName lastName avatar") 
+//         .sort({ createdAt: -1 }) 
+//         .lean();
+
+//     if (!requests) {
+//         throw APIError.internalServiceError("Failed to fetch your join requests.");
+//     }
+
+//     const formattedRequests = requests.map(req => {
+//         const teamSize = req.team.members ? req.team.members.length : 0;
+//         const spotsLeft = req.team.maxMembers - teamSize;
+
+//         return {
+//             requestId: req._id,
+//             team: {
+//                 id: req.team._id,
+//                 name: req.team.teamName,
+//                 avatar: req.team.avatar || "default-team.png",
+//                 tagline: req.team.tagline,
+//                 status: req.team.status, 
+//                 spotsLeft: spotsLeft
+//             },
+//             leader: {
+//                 name: `${req.receiver.firstName} ${req.receiver.lastName}`,
+//                 avatar: req.receiver.avatar || "default-avatar.png"
+//             },
+//             messageSent: req.message, 
+//             requestStatus: req.status, 
+//             requestedAt: req.createdAt
+//         };
+//     });
+
+//     return formattedRequests;
+// };
+
 export const getUserSentRequests = async (userId) => {
-    // FIXED: Populating firstName and lastName instead of "name"
     const requests = await JoinRequest.find({ sender: userId })
-        .populate("team", "teamName avatar tagline status maxMembers members")
+        .populate("team", "teamName avatar tagline description status maxMembers members")
         .populate("receiver", "firstName lastName avatar") 
         .sort({ createdAt: -1 }) 
         .lean();
@@ -229,7 +286,10 @@ export const getUserSentRequests = async (userId) => {
         throw APIError.internalServiceError("Failed to fetch your join requests.");
     }
 
-    const formattedRequests = requests.map(req => {
+    // SAFETY CHECK: Filter out requests where the team or receiver was deleted
+    const validRequests = requests.filter(req => req.team != null && req.receiver != null);
+
+    const formattedRequests = validRequests.map(req => {
         const teamSize = req.team.members ? req.team.members.length : 0;
         const spotsLeft = req.team.maxMembers - teamSize;
 
@@ -239,12 +299,11 @@ export const getUserSentRequests = async (userId) => {
                 id: req.team._id,
                 name: req.team.teamName,
                 avatar: req.team.avatar || "default-team.png",
-                tagline: req.team.tagline,
+                tagline: req.team.description || req.team.tagline, // Fallback for merged models
                 status: req.team.status, 
                 spotsLeft: spotsLeft
             },
             leader: {
-                // FIXED: String interpolation for first and last name
                 name: `${req.receiver.firstName} ${req.receiver.lastName}`,
                 avatar: req.receiver.avatar || "default-avatar.png"
             },
@@ -256,7 +315,6 @@ export const getUserSentRequests = async (userId) => {
 
     return formattedRequests;
 };
-
 export const createJoinRequest = async (senderId, teamId, message = "") => {
     const team = await Team.findById(teamId);
     
@@ -269,7 +327,7 @@ export const createJoinRequest = async (senderId, teamId, message = "") => {
     }
 
     const isAlreadyMember = team.members.some(
-        member => member.user.toString() === senderId.toString()
+        memberId => memberId.toString() === senderId.toString()
     );
     if (isAlreadyMember) {
         throw APIError.conflict("You are already a member of this team.");
@@ -295,4 +353,25 @@ export const createJoinRequest = async (senderId, teamId, message = "") => {
         }
         throw APIError.internalServiceError("Failed to create join request.");
     }
+};
+
+export const processLeaveTeam = async (teamId, userId) => {
+    const team = await Team.findById(teamId);
+    if (!team) throw APIError.notFound("Team not found.");
+
+    if (team.leader.toString() === userId.toString()) {
+        throw APIError.badRequest("The leader cannot leave the team.");
+    }
+
+    const initialLength = team.members.length;
+    team.members = team.members.filter(mId => mId.toString() !== userId.toString());
+
+    if (team.members.length === initialLength) {
+        throw APIError.badRequest("You are not a member of this team.");
+    }
+
+    if (team.status === "Full") team.status = "Recruiting";
+
+    await team.save();
+    return team;
 };

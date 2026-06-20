@@ -94,3 +94,23 @@ export const uploadAvatar = async (req, res, next) => {
         next(APIError.internalServiceError(`Cloudinary Error: ${err.message || "Unknown error"}`));
     }
 };
+
+export const getPublicProfile = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const userProfile = await User.findById(id).select('-password');
+        
+        if (!userProfile) {
+            throw APIError.notFound("User not found");
+        }
+
+        return APIResponse.ok(res, "Public profile fetched successfully", {
+            user: userProfile
+        });
+    } catch (err) {
+        if (err.name === "CastError") {
+            return next(APIError.badRequest("Invalid User ID format"));
+        }
+        next(err);
+    }
+};
