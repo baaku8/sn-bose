@@ -23,6 +23,6 @@ export const validate = (data) => {
     // 4. Validate password strength
     // Kept minSymbols: 0 for easy local testing as you configured
     if (!validator.isStrongPassword(data.password, { minSymbols: 0 })) {
-        throw new Error("Password is weak !  Enter a Strong Password ");
+        throw new Error("Password must be at least 8 characters, 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol ");
     }
 };
