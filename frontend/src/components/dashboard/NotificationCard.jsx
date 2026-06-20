@@ -1,24 +1,28 @@
+import { Link } from "react-router-dom";
+
 export default function NotificationCard({ notification, onResolve, isProcessing }) {
   const { requester, teamName, message, spotsLeft, requestedAt, requestId } = notification;
 
   return (
     <div className="bg-[#1a1a1a] border border-neutral-800 rounded-2xl p-5 flex flex-col">
       
-      {/* Requester Info */}
+      {/* Requester Info - CLICKABLE LINK TO PROFILE */}
       <div className="flex items-center gap-4 mb-4 border-b border-neutral-800/80 pb-4">
-        <div className="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-xl font-bold text-neutral-400">
-          {requester.avatar && requester.avatar !== "default-avatar.png" ? (
-            <img src={requester.avatar} alt={requester.name} className="w-full h-full object-cover rounded-full" />
-          ) : (
-            requester.name.charAt(0)
-          )}
-        </div>
-        <div>
-          <h4 className="text-white font-bold leading-tight">{requester.name}</h4>
-          <span className="text-xs text-neutral-400">
-            Wants to join: <span className="text-neutral-300 font-medium">{teamName}</span>
-          </span>
-        </div>
+        <Link to={`/dashboard/user/${requester.id}`} className="flex items-center gap-4 group flex-1">
+            <div className="w-12 h-12 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-xl font-bold text-neutral-400 group-hover:border-green-500/50 transition-colors overflow-hidden shrink-0">
+            {requester.avatar && requester.avatar !== "default-avatar.png" ? (
+                <img src={requester.avatar} alt={requester.name} className="w-full h-full object-cover rounded-full" />
+            ) : (
+                requester.name.charAt(0)
+            )}
+            </div>
+            <div>
+            <h4 className="text-white font-bold leading-tight group-hover:text-green-400 transition-colors">{requester.name}</h4>
+            <span className="text-xs text-neutral-400">
+                Wants to join: <span className="text-neutral-300 font-medium">{teamName}</span>
+            </span>
+            </div>
+        </Link>
       </div>
 
       {/* Message and Skills */}

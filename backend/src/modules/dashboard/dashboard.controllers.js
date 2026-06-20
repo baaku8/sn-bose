@@ -8,7 +8,8 @@ import {
     resolveJoinRequest,
     getJoinedTeams,
     getUserSentRequests,
-    createJoinRequest
+    createJoinRequest,
+    removeTeamMember, processLeaveTeam
 } from "./dashboard.services.js";
 
 // ----- LEADER CONTROLS -----
@@ -166,6 +167,31 @@ export const sendJoinRequest = async (req, res, next) => {
     } catch (error) {
         console.error("Error creating join request:", error);
         // FIXED: Passed error to next()
+        next(error);
+    }
+};
+export const removeMemberFromTeam = async (req, res, next) => {
+    try {
+        const leaderId = req.user.id || req.user._id; 
+        const { teamId, memberId } = req.params;
+
+        await removeTeamMember(teamId, memberId, leaderId);
+
+        return APIResponse.ok(res, "Member removed successfully");
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const leaveTeam = async (req, res, next) => {
+    try {
+        const userId = req.user.id || req.user._id; 
+        const { teamId } = req.params;
+
+        await processLeaveTeam(teamId, userId);
+
+        return APIResponse.ok(res, "You have left the team successfully");
+    } catch (error) {
         next(error);
     }
 };

@@ -4,13 +4,13 @@ const joinRequestSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Profile",
+      ref: "User", // FIXED: Changed from "Profile" to "User"
       required: true,
     },
 
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Profile",
+      ref: "User", // FIXED: Changed from "Profile" to "User"
       required: true,
     },
 
@@ -48,8 +48,5 @@ joinRequestSchema.index(
   }
 );
 
-const JoinRequest=mongoose.model(
-  "JoinRequest",
-  joinRequestSchema
-);
-export default joinRequest
+const JoinRequest = mongoose.model("JoinRequest", joinRequestSchema);
+export default JoinRequest;

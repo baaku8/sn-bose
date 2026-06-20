@@ -3,7 +3,8 @@ import { userMiddleware } from "../UserProfile/user.middlewares.js";
 import { 
     getOwnedTeams, updateTeamDetails, getTeamDetailsForEdit, 
     fetchNotifications, handleRequest, fetchJoinedTeams, 
-    fetchMySentRequests, sendJoinRequest 
+    fetchMySentRequests, sendJoinRequest,
+    removeMemberFromTeam, leaveTeam
 } from "./dashboard.controllers.js";
 
 export const router = express.Router();
@@ -18,5 +19,6 @@ router.put("/manageNotifications/:requestId", handleRequest);
 router.get("/user-teams/joined-teams", fetchJoinedTeams);
 router.get("/user-teams/all-requests", fetchMySentRequests);
 router.post("/user-teams/create-request", sendJoinRequest);
+router.delete("/user-teams/:teamId/leave", leaveTeam);
 
 export default router;
