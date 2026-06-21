@@ -22,6 +22,8 @@ import ManageTeam from "./pages/dashboard/ManageTeam";
 import ViewTeam from "./pages/dashboard/ViewTeam";
 import ViewProfile from "./pages/dashboard/ViewProfile";
 
+import ExploreTeamDetails from './pages/dashboard/ExploreTeamDetails';
+
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated, isCheckingAuth } = useSelector((state) => state.auth);
@@ -67,6 +69,8 @@ function App() {
         <Route path="manage/:id" element={<ManageTeam />} />
         <Route path="team/:id" element={<ViewTeam />} />
         <Route path="user/:id" element={<ViewProfile />} /> 
+        
+        <Route path="/dashboard/explore/:id" element={<ExploreTeamDetails />} />
 
       </Route>
     </Routes>

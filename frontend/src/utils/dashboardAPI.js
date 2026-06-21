@@ -28,4 +28,5 @@ export const dashboardAPI = {
   // NEW ENDPOINTS FOR REMOVING / LEAVING
   removeMember: (teamId, memberId) => axiosClient.delete(`/dashboard/manageMyTeams/${teamId}/member/${memberId}`),
   leaveTeam: (teamId) => axiosClient.delete(`/dashboard/user-teams/${teamId}/leave`),
+  getAllTeams: () => axiosClient.get('/'),
 };

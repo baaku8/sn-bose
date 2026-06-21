@@ -30,8 +30,8 @@ export default function ManageTeam() {
           maxMembers: teamData.maxMembers || 5,
           status: teamData.status || "Recruiting",
         });
-      } catch (error) {
-        setMessage({ type: "error", text: "Failed to load team details." });
+      } catch (e) {
+        setMessage({ type: "error", text: "Failed to load team details.", error:e});
       } finally {
         setIsFetching(false);
       }

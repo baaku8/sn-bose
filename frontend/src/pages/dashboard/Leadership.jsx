@@ -4,6 +4,16 @@ import { dashboardAPI } from "../../utils/dashboardAPI";
 import TeamCard from "../../components/dashboard/TeamCard";
 import NotificationCard from "../../components/dashboard/NotificationCard";
 
+const safelyExtractArray = (res) => {
+  let rawData = res?.data?.data || res?.data; 
+  if (rawData && rawData.data) {
+    rawData = rawData.data;
+  }
+  if (Array.isArray(rawData)) return rawData;
+  if (rawData) return [rawData]; 
+  return [];
+};
+
 export default function Leadership() {
   const { user } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("manage");
@@ -13,15 +23,14 @@ export default function Leadership() {
   const [isFetching, setIsFetching] = useState(true);
   const [processingId, setProcessingId] = useState(null);
 
-  // Updated Form States with Category and Mode
   const [createForm, setCreateForm] = useState({
     teamName: "",
     description: "",
     maxMembers: 5,
     contactEmail: user?.email || "",
     technologies: [],
-    category: "Web Development", // Default value matching backend
-    mode: "Online"               // Default value matching backend
+    category: "Web Development",
+    mode: "Online"
   });
   const [techInput, setTechInput] = useState(""); 
   
@@ -37,33 +46,9 @@ export default function Leadership() {
           dashboardAPI.getNotifications()
         ]);
 
-        // 1. Safely extract the raw data, handling the double-nested { data: { data: [...] } }
-        let rawTeams = teamsRes.data?.data;
-        if (rawTeams && rawTeams.data) {
-          rawTeams = rawTeams.data; // Dig one level deeper if needed
-        }
-
-        let rawNotifs = notifRes.data?.data;
-        if (rawNotifs && rawNotifs.data) {
-          rawNotifs = rawNotifs.data;
-        }
-
-        // 2. SAFETY CHECK: Force the data to be an array
-        if (rawTeams && !Array.isArray(rawTeams)) {
-          rawTeams = [rawTeams];
-        } else if (!rawTeams) {
-          rawTeams = [];
-        }
-
-        if (rawNotifs && !Array.isArray(rawNotifs)) {
-          rawNotifs = [rawNotifs];
-        } else if (!rawNotifs) {
-          rawNotifs = [];
-        }
-
-        // 3. Set the state
-        setOwnedTeams(rawTeams);
-        setNotifications(rawNotifs);
+        // Use the safe helper instead of messy nested if-statements
+        setOwnedTeams(safelyExtractArray(teamsRes));
+        setNotifications(safelyExtractArray(notifRes));
 
       } catch (error) {
         console.error("Failed to load leadership data:", error);
@@ -82,7 +67,8 @@ export default function Leadership() {
       
       if (action === "accept") {
         const teamsRes = await dashboardAPI.getOwnedTeams();
-        setOwnedTeams(teamsRes.data?.data || []);
+        // Use the safe helper here too
+        setOwnedTeams(safelyExtractArray(teamsRes));
       }
     } catch (error) {
       console.error(`Failed to ${action} request:`, error);
@@ -124,7 +110,6 @@ export default function Leadership() {
       await dashboardAPI.createTeam(payload);
       setCreateMessage({ type: "success", text: "Team created successfully!" });
       
-      // Reset form including the new fields
       setCreateForm({
         teamName: "",
         description: "",
@@ -136,8 +121,9 @@ export default function Leadership() {
       });
       setTechInput("");
 
+      // 🚨 FIX IS HERE: Securely extract the array to prevent the map() crash!
       const teamsRes = await dashboardAPI.getOwnedTeams();
-      setOwnedTeams(teamsRes.data?.data || []);
+      setOwnedTeams(safelyExtractArray(teamsRes)); 
       
       setTimeout(() => setActiveTab("manage"), 1500);
 
@@ -202,7 +188,7 @@ export default function Leadership() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-                    {ownedTeams.map(team => <TeamCard key={team.id} team={team} isLeader={true} />)}
+                    {ownedTeams.map(team => <TeamCard key={team._id || team.id} team={team} isLeader={true} />)}
                   </div>
                 )}
               </div>
@@ -254,7 +240,7 @@ export default function Leadership() {
                      />
                    </div>
 
-                   {/* NEW CATEGORY & MODE INPUTS */}
+                   {/* CATEGORY & MODE INPUTS */}
                    <div className="grid grid-cols-2 gap-4">
                      <div>
                        <label className="block text-sm font-medium text-neutral-400 mb-2">Category</label>
