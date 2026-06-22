@@ -3,7 +3,7 @@ import app from "./src/app.js";
 import DbConnect from "./src/common/config/db.js";
 import User from "./src/modules/UserProfile/user.models.js";
 import authRouter from "./src/modules/Authentication/auth.routers.js";
-import profileRouter from "./src/modules/UserProfile/userProfile.routes.js";
+import profileRouter from "./src/modules/UserProfile/userProfile.Routes.js";
 import teamRouter from './src/modules/team/team.routes.js'
 import express from "express";
 import { connectRedis } from "./src/common/config/redis.js";
@@ -16,7 +16,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    // origin: 'http://localhost:5173', 
+    origin: 'https://sn-bose.onrender.com/',
     credentials: true                
 }));
 
