@@ -23,7 +23,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  // --- NEW: View & Details States ---
+  // --- View & Details States ---
   const [view, setView] = useState("feed"); // "feed" | "details"
   const [selectedTeamDetails, setSelectedTeamDetails] = useState(null);
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
@@ -51,28 +51,27 @@ export default function Home() {
     }
   };
 
-  // --- NEW: Fetch Single Team Details ---
+  // Fetch Single Team Details
   const handleViewTeamDetails = async (teamId) => {
     setView("details");
     setIsFetchingDetails(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top when opening details
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
     
     try {
       const res = await dashboardAPI.getTeamDetails(teamId);
       setSelectedTeamDetails(res.data?.data || res.data);
     } catch (error) {
       console.error("Failed to fetch team details", error);
-      setView("feed"); // Go back to feed if it fails
+      setView("feed"); 
     } finally {
       setIsFetchingDetails(false);
     }
   };
 
-  // --- NEW: Handle Apply Routing ---
+  // Handle Apply Routing
   const handleRequestToJoin = () => {
     if (isAuthenticated && selectedTeamDetails) {
       const teamId = selectedTeamDetails._id || selectedTeamDetails.id;
-      // 🚨 Redirect directly to the dedicated page, instantly opening the apply form!
       navigate(`/dashboard/explore/${teamId}?apply=true`); 
     } else {
       navigate("/login");
@@ -89,51 +88,85 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-50 selection:bg-neutral-800 pb-20">
+    <div className="min-h-screen bg-[#09090b] text-neutral-50 selection:bg-green-500/30 selection:text-green-200 pb-20 relative overflow-hidden">
       
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-6 max-w-7xl mx-auto">
-        <h1 
-          onClick={() => { setView("feed"); setSelectedTeamDetails(null); }}
-          className="text-2xl font-bold tracking-tighter cursor-pointer"
-        >
-          SyncUP<span className="text-neutral-600">.</span>
-        </h1>
+      {/* Subtle Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-500/40 via-transparent to-transparent blur-3xl"></div>
 
-        <div className="flex items-center gap-6">
-          {isAuthenticated ? (
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate("/dashboard")} className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                Go to Dashboard
-              </button>
-              <button onClick={handleLogout} className="px-5 py-2.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-sm font-medium hover:bg-red-500/20 transition-colors">
-                Log out
-              </button>
+      {/* --- MODERN NAVBAR --- */}
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-800/50 bg-[#09090b]/80 backdrop-blur-xl">
+        <nav className="flex items-center justify-between px-6 md:px-12 py-4 max-w-7xl mx-auto">
+          <div 
+            onClick={() => { setView("feed"); setSelectedTeamDetails(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="flex items-center gap-2 cursor-pointer group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:shadow-green-500/40 transition-shadow">
+              <span className="text-black font-bold text-lg leading-none">S</span>
             </div>
-          ) : (
-            <>
-              <button onClick={() => navigate("/login")} className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-                Log in
-              </button>
-              <button onClick={() => navigate("/signup")} className="px-5 py-2.5 rounded-lg bg-white text-black text-sm font-medium hover:bg-neutral-200 transition-colors">
-                Sign up
-              </button>
-            </>
-          )}
-        </div>
-      </nav>
+            <h1 className="text-xl font-bold tracking-tight text-white">
+              SyncUP<span className="text-green-500">.</span>
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-4 md:gap-6">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-5">
+                <button 
+                  onClick={handleLogout} 
+                  className="text-sm font-medium text-neutral-400 hover:text-red-400 transition-colors"
+                >
+                  Log out
+                </button>
+                <button 
+                  onClick={() => navigate("/dashboard")} 
+                  className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 hover:scale-105 transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
+                >
+                  Dashboard
+                </button>
+              </div>
+            ) : (
+              <>
+                <button 
+                  onClick={() => navigate("/login")} 
+                  className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
+                >
+                  Log in
+                </button>
+                <button 
+                  onClick={() => navigate("/signup")} 
+                  className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 hover:scale-105 transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+          </div>
+        </nav>
+      </header>
 
       {/* --- CONDITIONAL RENDERING BASED ON VIEW STATE --- */}
       {view === "feed" ? (
         <>
-          {/* Hero Section */}
-          <main className="flex flex-col items-center justify-center text-center px-6 mt-24 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-semibold tracking-tight text-white leading-[1.1]">
+          {/* --- MODERN HERO SECTION --- */}
+          <main className="relative flex flex-col items-center justify-center text-center px-6 pt-32 pb-24 max-w-5xl mx-auto">
+            
+            {/* Status Pill */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-900/50 border border-neutral-800 backdrop-blur-sm mb-8 animate-fade-in-up">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-xs font-medium text-neutral-300 tracking-wide uppercase">Live Projects Available</span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-white leading-[1.1] mb-6">
               Finding teams <br className="hidden md:block" />
-              <span className="text-neutral-500">is easy now.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 drop-shadow-sm">
+                is easy now.
+              </span>
             </h1>
 
-            <p className="mt-6 md:mt-8 text-lg md:text-xl text-neutral-400 leading-relaxed max-w-2xl font-light">
+            <p className="text-lg md:text-xl text-neutral-400 leading-relaxed max-w-2xl font-light mb-10">
               Connect with developers, designers, AI enthusiasts, and builders for your next project. Stop searching and start shipping.
             </p>
 
@@ -141,19 +174,27 @@ export default function Home() {
               onClick={() => {
                 document.getElementById('explore-section').scrollIntoView({ behavior: 'smooth' });
               }}
-              className="mt-12 px-8 py-3.5 rounded-full border border-neutral-800 bg-neutral-900 text-white text-sm font-medium shadow-sm hover:border-neutral-700 hover:bg-neutral-800 transition-all mb-24"
+              className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-sm font-semibold text-white transition-all duration-300 bg-neutral-900 border border-neutral-700 rounded-full hover:bg-neutral-800 hover:border-neutral-600 hover:shadow-[0_0_30px_-5px_rgba(34,197,94,0.3)] hover:-translate-y-1"
             >
-              Explore Teams &darr;
+              Explore Live Projects
+              <svg 
+                className="w-4 h-4 text-green-400 transition-transform duration-300 group-hover:translate-y-1" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
             </button>
           </main>
 
           {/* Live Projects Feed */}
-          <section id="explore-section" className="max-w-7xl mx-auto px-6 md:px-12">
+          <section id="explore-section" className="max-w-7xl mx-auto px-6 md:px-12 pt-10">
             
             {/* Feed Header & Filters */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-8 border-b border-neutral-900">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Explore Live Projects</h2>
+                <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Project Directory</h2>
                 <p className="text-neutral-500 text-sm">Browse actively recruiting teams and jump right in.</p>
               </div>
 
@@ -169,14 +210,14 @@ export default function Home() {
                     placeholder="Search by name or tech..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-[#121212] border border-neutral-800 rounded-xl text-white text-sm focus:border-green-500/50 outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-neutral-900/50 border border-neutral-800 rounded-xl text-white text-sm focus:border-green-500/50 focus:bg-neutral-900 outline-none transition-all"
                   />
                 </div>
                 
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full sm:w-48 px-4 py-2.5 bg-[#121212] border border-neutral-800 rounded-xl text-white text-sm focus:border-green-500/50 outline-none transition-colors cursor-pointer appearance-none"
+                  className="w-full sm:w-48 px-4 py-2.5 bg-neutral-900/50 border border-neutral-800 rounded-xl text-white text-sm focus:border-green-500/50 focus:bg-neutral-900 outline-none transition-all cursor-pointer appearance-none"
                 >
                   <option value="All">All Categories</option>
                   <option value="Web Development">Web Dev</option>
@@ -194,58 +235,60 @@ export default function Home() {
             {/* Feed Grid */}
             {isFetching ? (
               <div className="flex items-center justify-center h-64">
-                <span className="animate-spin h-8 w-8 border-4 border-neutral-800 border-t-neutral-400 rounded-full"></span>
+                <span className="animate-spin h-8 w-8 border-4 border-neutral-800 border-t-green-500 rounded-full"></span>
               </div>
             ) : allTeams.length === 0 ? (
-              <div className="text-center p-16 border border-dashed border-neutral-900 rounded-3xl">
+              <div className="text-center p-16 border border-dashed border-neutral-900 rounded-3xl bg-neutral-950/50">
                 <p className="text-neutral-500">No open teams available right now.</p>
               </div>
             ) : filteredTeams.length === 0 ? (
-              <div className="text-center p-16 border border-dashed border-neutral-900 rounded-3xl">
-                <p className="text-neutral-500">No teams match your search criteria.</p>
-                <button onClick={() => { setSearchQuery(""); setCategoryFilter("All"); }} className="mt-4 text-neutral-300 hover:text-white text-sm font-medium">Clear Filters</button>
+              <div className="text-center p-16 border border-dashed border-neutral-900 rounded-3xl bg-neutral-950/50">
+                <p className="text-neutral-500 mb-4">No teams match your search criteria.</p>
+                <button onClick={() => { setSearchQuery(""); setCategoryFilter("All"); }} className="px-4 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-neutral-300 hover:text-white hover:bg-neutral-800 text-sm font-medium transition-colors">
+                  Clear Filters
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredTeams.map(team => (
                   <div 
                     key={team._id} 
-                    onClick={() => handleViewTeamDetails(team._id || team.id)} // 🚨 FIX: Now fetches details
-                    className="bg-[#0a0a0a] border border-neutral-900 rounded-2xl p-6 hover:border-neutral-700 hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer group shadow-xl shadow-black/50"
+                    onClick={() => handleViewTeamDetails(team._id || team.id)} 
+                    className="bg-neutral-900/30 border border-neutral-800/60 backdrop-blur-sm rounded-2xl p-6 hover:border-neutral-600 hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer group shadow-xl shadow-black/50 hover:shadow-green-900/10"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-xl font-bold text-white leading-tight group-hover:text-neutral-300 transition-colors">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-bold text-white leading-tight group-hover:text-green-400 transition-colors">
                         {team.name || team.teamName}
                       </h3>
-                      <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-neutral-900 text-neutral-400 border border-neutral-800 whitespace-nowrap">
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-md bg-neutral-800/50 text-neutral-400 border border-neutral-700/50 whitespace-nowrap">
                         {team.category === "Web Development" ? "Web" : team.category || "General"}
                       </span>
                     </div>
                     
-                    <p className="text-sm text-neutral-500 line-clamp-3 mb-6 flex-1">
+                    <p className="text-sm text-neutral-400 line-clamp-3 mb-6 flex-1 font-light leading-relaxed">
                       {team.description}
                     </p>
                     
                     <div className="flex flex-wrap gap-2 mb-6">
                       {(team.technologies || []).slice(0, 3).map((tech, i) => (
-                        <span key={i} className="text-[11px] bg-[#121212] text-neutral-400 px-2.5 py-1 rounded-md border border-neutral-800">
+                        <span key={i} className="text-[11px] font-medium bg-neutral-950 text-neutral-300 px-2.5 py-1 rounded-md border border-neutral-800">
                           {tech}
                         </span>
                       ))}
                       {(team.technologies?.length > 3) && (
-                        <span className="text-[11px] text-neutral-600 px-1 py-1">
+                        <span className="text-[11px] font-medium text-neutral-500 px-1 py-1">
                           +{team.technologies.length - 3}
                         </span>
                       )}
                     </div>
                     
-                    <div className="mt-auto pt-5 border-t border-neutral-900/50 flex items-center justify-between">
-                      <span className="text-xs text-neutral-600 font-medium flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500/50"></span>
+                    <div className="mt-auto pt-5 border-t border-neutral-800/50 flex items-center justify-between">
+                      <span className="text-xs text-neutral-500 font-medium flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500/80"></span>
                         {team.members?.length || 1} / {team.maxMembers} Members
                       </span>
-                      <span className="text-sm text-white font-medium group-hover:underline decoration-neutral-600 underline-offset-4 transition-all">
-                        View Details &rarr;
+                      <span className="text-sm text-white font-medium group-hover:text-green-400 transition-colors flex items-center gap-1">
+                        View Details <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
                       </span>
                     </div>
                   </div>
@@ -257,45 +300,45 @@ export default function Home() {
       ) : (
         
         /* --- TEAM DETAILS VIEW --- */
-        <section className="max-w-4xl mx-auto px-6 md:px-12 mt-12">
+        <section className="max-w-4xl mx-auto px-6 md:px-12 mt-12 pt-8">
           <button 
             onClick={() => { setView("feed"); setSelectedTeamDetails(null); }}
-            className="flex items-center gap-2 text-sm text-neutral-500 hover:text-white mb-8 transition-colors"
+            className="group flex items-center gap-2 text-sm text-neutral-400 hover:text-white mb-8 transition-colors px-4 py-2 rounded-full bg-neutral-900/50 border border-neutral-800 w-fit"
           >
-            <span>&larr;</span> Back to Projects
+            <span className="group-hover:-translate-x-1 transition-transform">&larr;</span> Back to Directory
           </button>
 
           {isFetchingDetails ? (
             <div className="flex items-center justify-center h-64">
-              <span className="animate-spin h-8 w-8 border-4 border-neutral-800 border-t-neutral-400 rounded-full"></span>
+              <span className="animate-spin h-8 w-8 border-4 border-neutral-800 border-t-green-500 rounded-full"></span>
             </div>
           ) : selectedTeamDetails ? (
-            <div className="bg-[#0a0a0a] border border-neutral-900 rounded-3xl p-8 md:p-12 shadow-2xl">
+            <div className="bg-neutral-900/40 backdrop-blur-md border border-neutral-800/60 rounded-3xl p-8 md:p-12 shadow-2xl">
               
               {/* Header */}
-              <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-b border-neutral-900 pb-8 mb-8">
+              <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-b border-neutral-800/60 pb-8 mb-8">
                 <div>
                   <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
                     {selectedTeamDetails.name || selectedTeamDetails.teamName}
                   </h2>
                   <div className="flex flex-wrap gap-3 items-center">
-                    <span className="text-xs uppercase tracking-wider font-bold px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-300 border border-neutral-800">
+                    <span className="text-xs uppercase tracking-wider font-bold px-3 py-1.5 rounded-full bg-neutral-950 text-neutral-300 border border-neutral-800">
                       {selectedTeamDetails.category || "General"}
                     </span>
-                    <span className="text-xs uppercase tracking-wider font-bold px-3 py-1.5 rounded-full bg-neutral-900 text-neutral-400 border border-neutral-800">
+                    <span className="text-xs uppercase tracking-wider font-bold px-3 py-1.5 rounded-full bg-neutral-950 text-neutral-400 border border-neutral-800">
                       {selectedTeamDetails.mode || "Online"}
                     </span>
-                    <span className="text-xs font-medium text-green-400 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span className="text-xs font-medium text-green-400 flex items-center gap-2 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                       {selectedTeamDetails.status || "Recruiting"}
                     </span>
                   </div>
                 </div>
                 
-                <div className="text-left md:text-right bg-[#121212] px-6 py-4 rounded-2xl border border-neutral-900 min-w-[140px]">
-                  <p className="text-xs text-neutral-500 uppercase font-bold mb-1">Capacity</p>
+                <div className="text-left md:text-right bg-neutral-950/50 px-6 py-4 rounded-2xl border border-neutral-800 min-w-[140px]">
+                  <p className="text-xs text-neutral-500 uppercase font-bold mb-1 tracking-wider">Capacity</p>
                   <p className="text-2xl text-white font-bold">
-                    {selectedTeamDetails.members?.length || 1} <span className="text-neutral-500 text-lg">/ {selectedTeamDetails.maxMembers}</span>
+                    {selectedTeamDetails.members?.length || 1} <span className="text-neutral-600 text-lg">/ {selectedTeamDetails.maxMembers}</span>
                   </p>
                 </div>
               </div>
@@ -304,7 +347,7 @@ export default function Home() {
                 {/* Description */}
                 <div>
                   <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-wider mb-4">About the Project</h3>
-                  <p className="text-neutral-300 text-base leading-relaxed whitespace-pre-wrap">
+                  <p className="text-neutral-300 text-base leading-relaxed whitespace-pre-wrap font-light">
                     {selectedTeamDetails.description}
                   </p>
                 </div>
@@ -313,9 +356,9 @@ export default function Home() {
                 <div>
                   <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-wider mb-4">Required Technologies</h3>
                   {selectedTeamDetails.technologies?.length > 0 ? (
-                    <div className="flex flex-wrap gap-2.5">
+                    <div className="flex flex-wrap gap-3">
                       {selectedTeamDetails.technologies.map((tech, i) => (
-                        <span key={i} className="text-sm bg-[#121212] text-neutral-300 px-4 py-2 rounded-xl border border-neutral-800">
+                        <span key={i} className="text-sm font-medium bg-neutral-950 text-neutral-300 px-4 py-2.5 rounded-xl border border-neutral-800 shadow-sm">
                           {tech}
                         </span>
                       ))}
@@ -326,12 +369,15 @@ export default function Home() {
                 </div>
 
                 {/* Call to Action Box */}
-                <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 text-center mt-12">
-                  <h3 className="text-xl font-bold text-white mb-2">Think you're a good fit?</h3>
-                  <p className="text-neutral-400 text-sm mb-6">Join the team to access the private workspace and source code.</p>
+                <div className="relative overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950 border border-neutral-800 rounded-3xl p-10 text-center mt-12">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-green-500/5 blur-[80px] pointer-events-none"></div>
+                  
+                  <h3 className="text-2xl font-bold text-white mb-3 relative z-10">Think you're a good fit?</h3>
+                  <p className="text-neutral-400 text-sm mb-8 max-w-md mx-auto relative z-10">Join the team to access the private workspace, connect with the leader, and view the source code.</p>
+                  
                   <button 
                     onClick={handleRequestToJoin}
-                    className="w-full md:w-auto px-10 py-4 bg-white text-black hover:bg-neutral-200 rounded-full font-bold transition-colors shadow-lg shadow-white/10"
+                    className="relative z-10 w-full md:w-auto px-10 py-4 bg-white text-black hover:bg-neutral-200 rounded-full font-bold transition-all shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95"
                   >
                     Request to Join Team
                   </button>

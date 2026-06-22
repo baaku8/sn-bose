@@ -91,64 +91,67 @@ export default function ManageTeam() {
   if (isFetching) {
     return (
       <div className="flex items-center justify-center h-64">
-        <span className="animate-spin h-8 w-8 border-4 border-neutral-600 border-t-neutral-300 rounded-full"></span>
+        <span className="animate-spin h-8 w-8 border-4 border-neutral-800 border-t-green-500 rounded-full"></span>
       </div>
     );
   }
 
   if (!team) {
-    return <div className="text-red-400">Team not found.</div>;
+    return (
+      <div className="text-center p-10 border border-dashed border-red-900/30 bg-red-900/10 rounded-3xl backdrop-blur-md max-w-4xl mx-auto">
+        <p className="text-red-400 font-medium">Team not found or you don't have access.</p>
+        <button onClick={() => navigate("/dashboard/leadership")} className="mt-4 text-sm text-neutral-400 hover:text-white transition-colors">
+          &larr; Go Back to Leadership
+        </button>
+      </div>
+    );
   }
+
+  const inputStyle = "w-full bg-neutral-900/50 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm focus:border-green-500/50 focus:bg-neutral-900 outline-none transition-all";
+  const labelStyle = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 
   return (
     <div className="max-w-4xl mx-auto pb-10">
+      
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8 border-b border-neutral-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 pb-6 border-b border-neutral-800/60">
         <button
           onClick={() => navigate("/dashboard/leadership")}
-          className="p-2 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors text-neutral-400"
+          className="group flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors px-4 py-2 rounded-full bg-neutral-900/50 border border-neutral-800 w-fit shrink-0"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <span className="group-hover:-translate-x-1 transition-transform">&larr;</span> Back
         </button>
         <div>
-          <h2 className="text-3xl font-bold text-white">{team.teamName}</h2>
-          <p className="text-sm text-neutral-400">Manage settings and roster</p>
+          <h2 className="text-3xl font-bold text-white tracking-tight">{team.teamName}</h2>
+          <p className="text-sm text-neutral-400 mt-1">Manage team settings and roster</p>
         </div>
       </div>
 
       {message.text && (
-        <div
-          className={`p-4 rounded-xl mb-6 text-sm font-medium ${message.type === "success" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}
-        >
+        <div className={`p-4 rounded-2xl mb-8 text-sm font-medium flex items-center gap-3 animate-fade-in-up ${message.type === "success" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
+          {message.type === "success" ? (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          )}
           {message.text}
         </div>
       )}
 
       {/* Internal Tabs */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-wrap gap-3 mb-8">
         <button
           onClick={() => setActiveTab("settings")}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === "settings" ? "bg-white text-black" : "bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800"}`}
+          className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${activeTab === "settings" ? "bg-green-500/10 text-green-400 border border-green-500/20 shadow-sm" : "bg-neutral-900/50 text-neutral-400 hover:text-neutral-200 border border-neutral-800 hover:border-neutral-700"}`}
         >
           Team Settings
         </button>
         <button
           onClick={() => setActiveTab("members")}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === "members" ? "bg-white text-black" : "bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800"}`}
+          className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${activeTab === "members" ? "bg-green-500/10 text-green-400 border border-green-500/20 shadow-sm" : "bg-neutral-900/50 text-neutral-400 hover:text-neutral-200 border border-neutral-800 hover:border-neutral-700"}`}
         >
-          Members{" "}
-          <span className="bg-neutral-800 px-2 py-0.5 rounded text-xs">
+          Members
+          <span className={`px-2 py-0.5 rounded-full text-xs border ${activeTab === "members" ? "bg-green-500/20 border-green-500/30 text-green-400" : "bg-neutral-800 border-neutral-700 text-neutral-400"}`}>
             {team.members?.length || 0}
           </span>
         </button>
@@ -156,32 +159,25 @@ export default function ManageTeam() {
 
       {/* SETTINGS TAB */}
       {activeTab === "settings" && (
-        <div className="bg-[#121212] border border-neutral-800 p-8 rounded-2xl shadow-xl">
+        <div className="bg-neutral-900/40 backdrop-blur-md border border-neutral-800/60 p-8 md:p-10 rounded-3xl shadow-2xl animate-fade-in">
           <form onSubmit={handleUpdateTeam} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-2">
-                  Team Name
-                </label>
+                <label className={labelStyle}>Team Name</label>
                 <input
                   type="text"
+                  required
                   value={editForm.teamName}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, teamName: e.target.value })
-                  }
-                  className="w-full bg-[#1a1a1a] border border-neutral-700 p-3.5 rounded-xl text-white focus:border-green-500 outline-none"
+                  onChange={(e) => setEditForm({ ...editForm, teamName: e.target.value })}
+                  className={inputStyle}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-2">
-                  Recruitment Status
-                </label>
+                <label className={labelStyle}>Recruitment Status</label>
                 <select
                   value={editForm.status}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, status: e.target.value })
-                  }
-                  className="w-full bg-[#1a1a1a] border border-neutral-700 p-3.5 rounded-xl text-white focus:border-green-500 outline-none"
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                  className={`${inputStyle} cursor-pointer appearance-none`}
                 >
                   <option value="Recruiting">Recruiting</option>
                   <option value="Completed">Completed</option>
@@ -190,34 +186,31 @@ export default function ManageTeam() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-2">
-                  Category
-                </label>
+                <label className={labelStyle}>Category</label>
                 <select
                   value={editForm.category}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, category: e.target.value })
-                  }
-                  className="w-full bg-[#1a1a1a] border border-neutral-700 p-3.5 rounded-xl text-white focus:border-green-500 outline-none"
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                  className={`${inputStyle} cursor-pointer appearance-none`}
                 >
                   <option value="Web Development">Web Development</option>
                   <option value="AI/ML">AI/ML</option>
                   <option value="Mobile Development">Mobile Development</option>
+                  <option value="Blockchain">Blockchain</option>
+                  <option value="Cyber Security">Cyber Security</option>
+                  <option value="Open Source">Open Source</option>
+                  <option value="Research">Research</option>
+                  <option value="Hackathon">Hackathon</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-2">
-                  Work Mode
-                </label>
+                <label className={labelStyle}>Work Mode</label>
                 <select
                   value={editForm.mode}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, mode: e.target.value })
-                  }
-                  className="w-full bg-[#1a1a1a] border border-neutral-700 p-3.5 rounded-xl text-white focus:border-green-500 outline-none"
+                  onChange={(e) => setEditForm({ ...editForm, mode: e.target.value })}
+                  className={`${inputStyle} cursor-pointer appearance-none`}
                 >
                   <option value="Online">Online</option>
                   <option value="Offline">Offline</option>
@@ -225,43 +218,38 @@ export default function ManageTeam() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-2">
-                  Max Members
-                </label>
+                <label className={labelStyle}>Max Members</label>
                 <input
                   type="number"
                   min="2"
+                  required
                   value={editForm.maxMembers}
                   onChange={(e) =>
                     setEditForm({
                       ...editForm,
-                      maxMembers:
-                        e.target.value === "" ? "" : parseInt(e.target.value),
+                      maxMembers: e.target.value === "" ? "" : parseInt(e.target.value),
                     })
                   }
-                  className="w-full bg-[#1a1a1a] border border-neutral-700 p-3.5 rounded-xl text-white focus:border-green-500 outline-none"
+                  className={inputStyle}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-400 mb-2">
-                Project Description
-              </label>
+              <label className={labelStyle}>Project Description</label>
               <textarea
+                required
                 value={editForm.description}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, description: e.target.value })
-                }
-                className="w-full h-32 bg-[#1a1a1a] border border-neutral-700 p-3.5 rounded-xl text-white focus:border-green-500 outline-none resize-none"
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                className={`${inputStyle} h-32 resize-none`}
               ></textarea>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-4 mt-2 border-t border-neutral-800/60">
               <button
                 type="submit"
                 disabled={isSaving}
-                className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-xl font-semibold transition-colors disabled:opacity-70"
+                className="bg-white hover:bg-neutral-200 text-black px-8 py-3.5 rounded-full font-bold transition-all disabled:opacity-70 flex items-center gap-2 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95"
               >
                 {isSaving ? "Saving..." : "Save Changes"}
               </button>
@@ -272,65 +260,66 @@ export default function ManageTeam() {
 
       {/* MEMBERS TAB */}
       {activeTab === "members" && (
-        <div className="bg-[#121212] border border-neutral-800 rounded-2xl shadow-xl overflow-hidden">
-          <div className="p-6 border-b border-neutral-800 bg-[#1a1a1a]">
-            <h3 className="text-lg font-bold text-white">Current Roster</h3>
+        <div className="bg-neutral-900/40 backdrop-blur-md border border-neutral-800/60 rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+          <div className="p-8 border-b border-neutral-800/60 bg-neutral-950/30">
+            <h3 className="text-xl font-bold text-white mb-1">Current Roster</h3>
             <p className="text-sm text-neutral-400">
               Manage the people currently in your team.
             </p>
           </div>
 
-          <div className="divide-y divide-neutral-800">
+          <div className="divide-y divide-neutral-800/60">
             {team.members?.map((member) => (
               <div
                 key={member._id || member.id}
-                className="p-6 flex items-center justify-between hover:bg-[#151515] transition-colors"
+                className="p-6 md:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-neutral-800/30 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-white font-bold border border-neutral-700">
+                  <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-white font-bold border-2 border-neutral-700 shrink-0 overflow-hidden">
                     {member.profileImage ? (
                       <img
                         src={member.profileImage}
                         alt={member.firstName}
-                        className="w-full h-full rounded-full object-cover"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       member.firstName?.charAt(0) || "U"
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-white">
+                    <p className="font-bold text-white text-base">
                       {member.firstName} {member.lastName}
                     </p>
-                    <p className="text-xs text-neutral-500">{member.email}</p>
+                    <p className="text-sm text-neutral-500">{member.email}</p>
                   </div>
                 </div>
 
                 {/* Don't allow kicking the leader */}
-                {(team.leader._id || team.leader) ===
-                (member._id || member.id) ? (
-                  <span className="text-xs font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
-                    Team Leader
-                  </span>
-                ) : (
-                  <button
-                    onClick={() =>
-                      handleRemoveMember(
-                        member._id || member.id,
-                        member.firstName,
-                      )
-                    }
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-transparent hover:border-red-500/20"
-                  >
-                    Remove
-                  </button>
-                )}
+                <div className="shrink-0">
+                  {(team.leader._id || team.leader) === (member._id || member.id) ? (
+                    <span className="text-xs font-bold text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-md border border-yellow-500/20 uppercase tracking-wider inline-block">
+                      Team Leader
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        handleRemoveMember(
+                          member._id || member.id,
+                          member.firstName,
+                        )
+                      }
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-xl text-sm font-medium transition-all border border-transparent hover:border-red-500/20 w-full sm:w-auto"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
 
             {(!team.members || team.members.length === 1) && (
-              <div className="p-10 text-center text-neutral-500">
-                You are the only member in this team right now.
+              <div className="p-12 text-center text-neutral-500">
+                <p>You are the only member in this team right now.</p>
               </div>
             )}
           </div>
